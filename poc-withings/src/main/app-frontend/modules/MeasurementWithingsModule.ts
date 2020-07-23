@@ -34,10 +34,9 @@ export class MeasurementWithingsModule_Class
 		this.reports.forEach(report => BeLogged.addClient(report));
 	}
 
-	sendMeasurementWithings = (subject: string, description: string) => {
+	sendMeasurementWithings = () => {
 		const body: Request_MeasurementWithings = {
-			subject,
-			description,
+
 			reports: this.reports.map(report => ({log: report.buffers, name: report.name})),
 
 		};
@@ -45,9 +44,9 @@ export class MeasurementWithingsModule_Class
 		HttpModule
 			.createRequest<ApiMeasurementWithings>(HttpMethod.POST, RequestKey_MeasurementWithingsApi)
 			.setJsonBody(body)
-			.setRelativeUrl("/v1/bug-reports/report")
-			.setOnError(`Error updating the report`)
-			.setOnSuccessMessage(`Bug report sent!`)
+			.setRelativeUrl("/v1/poc-withings/measurements")
+			.setOnError(`Error updating the measurements`)
+			.setOnSuccessMessage(`Measurements succeed`)
 			.execute();
 	};
 }

@@ -23,7 +23,8 @@ import {
 } from "@nu-art/thunderstorm";
 import {DB_Object} from "@nu-art/firebase";
 import {Auditable} from "@nu-art/ts-common";
-import {TicketDetails} from "../app-backend/modules/MeasurementWithingsModule";
+import {Measurements_gen} from "../app-backend/modules/WithingsGetMeas";
+import {Measurements_heart} from "../app-backend/modules/WithingsGetHeart";
 
 export type MeasurementWithings = {
 	name: string
