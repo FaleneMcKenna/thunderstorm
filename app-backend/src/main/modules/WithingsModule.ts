@@ -21,6 +21,7 @@ import {
 	Module,
 } from "@nu-art/ts-common";
 import {HttpClient} from "../to-move/HttpClient";
+import {FirebaseModule, DatabaseWrapper} from "@nu-art/firebase/backend";
 
 type Config = ClientIds & {
 	accessToken: string
@@ -59,7 +60,8 @@ export type ResponseGetHeart = {};
 
 class WithingsModule_Class
 	extends Module<Config> {
-	private httpClient = new HttpClient("https://wbsapi.withings.net/v2"); //heart?action=list
+	private httpClient = new HttpClient("https://wbsapi.withings.net/v2");
+	private db!: DatabaseWrapper;
 
 	protected init(): void {
 		const token = this.config.accessToken;
@@ -67,6 +69,7 @@ class WithingsModule_Class
 			throw new ImplementationMissingException('Missing access token in the config. Please add and restart the server');
 
 		this.httpClient.setDefaultHeaders({Authorization: `Bearer ${token}`})
+		this.db = FirebaseModule.createAdminSession().getDatabase();
 	}
 
 	createBody = () => {
@@ -97,7 +100,7 @@ class WithingsModule_Class
 
 	postHeartRequest = async ()/*: Promise<ResponseGetHeart>*/ => {
 		const resp = await this.httpClient.get('/heart?action=list');
-		console.log(resp);
+		await this.db.set('/data/heart/response',resp);
 		return resp
 	};
 
