@@ -16,3 +16,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {
+	ApiResponse,
+	ExpressRequest,
+	ServerApi_Get
+} from "@nu-art/thunderstorm/backend";
+import {
+	ApiWithQuery,
+	QueryParams
+} from "@nu-art/thunderstorm";
+import {WithingsModule} from "@modules/WithingsModule";
+
+
+type Api_ListHeart = ApiWithQuery<'/v1/heart/list', any, QueryParams>
+
+class ServerApi_ListHeart
+	extends ServerApi_Get<Api_ListHeart> {
+
+	constructor(){
+		super('list')
+	}
+
+	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: void) {
+		return WithingsModule.postHeartRequest()
+	}
+
+}
+
+module.exports = new ServerApi_ListHeart()

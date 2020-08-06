@@ -1,3 +1,0 @@
-<component name="DependencyValidationManager">
-  <scope name="app-frontend" pattern="file[thunderstorm]:app-frontend/src//*||file[thunderstorm]:app-frontend/_config//*||file:app-frontend/webpack.config.js" />
-</component>

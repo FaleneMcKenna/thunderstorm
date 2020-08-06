@@ -19,20 +19,13 @@
 
 export const config = {
 	HttpModule: {
-		origin: "https://us-central1-nu-art-thunderstorm.cloudfunctions.net/api",
-		timeout: 10000
-	},
-	frontend: {
-		origin: "https://nu-art-thunderstorm.firebaseapp.com",
-	},
-	ExampleModule: {
-		remoteUrl: "/v1/sample/endpoint-example"
+		// origin: "http://192.168.1.5:3000",
+		// origin: "http://localhost:5000/thunderstorm-staging/us-central1/api",
+		timeout: 30000,
+		compress: false
 	},
 	ForceUpgrade: {
 		assertVersionUrl: "/v1/version/assert"
-	},
-	PushPubSubModule: {
-		publicKeyBase64: 'BF0GqqEoe1UmqcU-dg3Dse_2ctkaq5uFpFuR6il1U9A3HkvYcL83I8yC_rX-G8mM8M0hnH5TqcSIsHScd4LTS28'
 	},
 	LocaleModule: {
 		defaultLocale: "en",

@@ -19,47 +19,21 @@
 import * as React from 'react';
 import {
 	BaseComponent,
-	Dialog,
-	PopupMenu,
-	RoutingModule,
-	Toaster,
 	WrapperProps
 } from "@nu-art/thunderstorm/frontend";
 
-import {VersionOnScreen} from './components/VersionOnScreen';
-import {
-	AccountModule,
-	OnLoginStatusUpdated
-} from "@nu-art/user-account/frontend";
-import {registerRoutes} from "./Routes";
-import {BugReport} from '@nu-art/bug-report/frontend';
-
 export class App
-	extends BaseComponent<WrapperProps>
-	implements OnLoginStatusUpdated {
+	extends BaseComponent<WrapperProps> {
 
 	public static dropBlocker<T>(ev: React.DragEvent<T>) {
 		ev.preventDefault();
 		ev.stopPropagation();
 	};
 
-	onLoginStatusUpdated = () => {
-		const status = AccountModule.getLoggedStatus();
-		console.log('status update', status);
-	};
-
-
 	render() {
-		registerRoutes();
 		return (
 			<div onDrop={App.dropBlocker} onDragOver={App.dropBlocker}>
-				<BugReport>
-					{RoutingModule.getRoutesMap()}
-				</BugReport>
-				<VersionOnScreen/>
-				<Dialog/>
-				<Toaster/>
-				<PopupMenu/>
+				Hello World
 			</div>);
 	}
 }

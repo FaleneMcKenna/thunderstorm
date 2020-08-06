@@ -1,3 +1,0 @@
-<component name="DependencyValidationManager">
-  <scope name="app-backend" pattern="file[thunderstorm]:app-backend/src//*" />
-</component>
