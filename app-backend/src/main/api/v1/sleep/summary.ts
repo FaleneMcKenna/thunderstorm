@@ -18,30 +18,30 @@
  */
 
 import {
-	ApiResponse,
-	ExpressRequest,
-	ServerApi_Get
+    ApiResponse,
+    ExpressRequest,
+    ServerApi_Get
 } from "@nu-art/thunderstorm/backend";
 import {
-	ApiWithQuery,
-	QueryParams
+    ApiWithQuery,
+    QueryParams
 } from "@nu-art/thunderstorm";
 import {WithingsModule} from "@modules/WithingsModule";
 
 
-type Api_ListHeart = ApiWithQuery<'/v1/heart/list', any, QueryParams>
+type Api_ListSleepSummary = ApiWithQuery<'/v1/sleep/summary', any, QueryParams>
 
-class ServerApi_ListHeart
-	extends ServerApi_Get<Api_ListHeart> {
+class ServerApi_ListSleepSummary
+    extends ServerApi_Get<Api_ListSleepSummary> {
 
-	constructor(){
-		super('list')
-	}
+    constructor(){
+        super('summary')
+    }
 
-	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: void) {
-		return WithingsModule.getHeartRequest()
-	}
+    protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: void) {
+        return WithingsModule.getSleepSummaryRequest()
+    }
 
 }
 
-module.exports = new ServerApi_ListHeart()
+module.exports = new ServerApi_ListSleepSummary()

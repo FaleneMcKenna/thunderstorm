@@ -98,7 +98,7 @@ class WithingsModule_Class
 		};
 	};
 
-	postHeartRequest = async ()/*: Promise<ResponseGetHeart>*/ => {
+	getHeartRequest = async ()/*: Promise<ResponseGetHeart>*/ => {
 		const resp = await this.httpClient.get('/heart?action=list');
 		await this.db.set('/data/heart/response',resp);
 		return resp
@@ -108,6 +108,17 @@ class WithingsModule_Class
 	//     return this.executeGetRequest(`/poc-withings/heart/${measurements}`)
 	// };
 
+	getSleepRequest = async ()/*: Promise<ResponseGetSleep>*/ => {
+		const resp = await this.httpClient.get('/sleep?action=get');
+		await this.db.set('/data/sleep/response',resp);
+		return resp
+	};
+
+	getSleepSummaryRequest = async ()/*: Promise<ResponseGetSleepSummary>*/ => {
+		const resp = await this.httpClient.get('/sleep?action=getsummary');
+		await this.db.set('/data/sleep/summary/response',resp);
+		return resp
+	};
 }
 
 export const WithingsModule = new WithingsModule_Class();
