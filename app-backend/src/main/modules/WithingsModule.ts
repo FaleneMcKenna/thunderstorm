@@ -56,7 +56,6 @@ export type WithingsRefreshToken = ClientIds & {
 	refresh_token: string
 };
 
-export type ResponseGetHeart = {};
 
 class WithingsModule_Class
 	extends Module<Config> {
@@ -66,59 +65,70 @@ class WithingsModule_Class
 	protected init(): void {
 		const token = this.config.accessToken;
 		if (!token)
-			throw new ImplementationMissingException('Missing access token in the config. Please add and restart the server');
+			throw new ImplementationMissingException('Missing Access Token in the config. Please add and then restart the server');
 
 		this.httpClient.setDefaultHeaders({Authorization: `Bearer ${token}`})
 		this.db = FirebaseModule.createAdminSession().getDatabase();
 	}
 
-	createBody = () => {
-		return {
-			"status": 0,
-			"body": {
-				"series": [
-					{
-						"deviceid": "string",
-						"model": 0,
-						"ecg": {
-							"signalid": 0,
-							"afib": 0
-						},
-						"bloodpressure": {
-							"diastole": 0,
-							"systole": 0
-						},
-						"heart_rate": 0,
-						"timestamp": 0
-					}
-				],
-				"offset": 0,
-				"more": true
-			}
-		};
-	};
-
-	getHeartRequest = async ()/*: Promise<ResponseGetHeart>*/ => {
-		const resp = await this.httpClient.get('/heart?action=list');
-		await this.db.set('/data/heart/response',resp);
-		return resp
-	};
-
-	// getHeartRequest = async (measurements: string): Promise<ResponseGetHeart> => {
-	//     return this.executeGetRequest(`/poc-withings/heart/${measurements}`)
+	// createBody = () => {
+	// 	return {
+	// 		"status": 0,
+	// 		"body": {
+	// 			"series": [
+	// 				{
+	// 					"deviceid": "string",
+	// 					"model": 0,
+	// 					"ecg": {
+	// 						"signalid": 0,
+	// 						"afib": 0
+	// 					},
+	// 					"bloodpressure": {
+	// 						"diastole": 0,
+	// 						"systole": 0
+	// 					},
+	// 					"heart_rate": 0,
+	// 					"timestamp": 0
+	// 				}
+	// 			],
+	// 			"offset": 0,
+	// 			"more": true
+	// 		}
+	// 	};
 	// };
-
+	getHeartRequest = async () => {
+		const response = await this.httpClient.get('/heart?action=list');
+		await this.db.set('/data/heart/response',response);
+		return response};
 	getSleepRequest = async ()/*: Promise<ResponseGetSleep>*/ => {
-		const resp = await this.httpClient.get('/sleep?action=get');
-		await this.db.set('/data/sleep/response',resp);
-		return resp
+		const response = await this.httpClient.get('/sleep?action=get');
+		await this.db.set('/data/sleep/response',response);
+		return response
 	};
 
-	getSleepSummaryRequest = async ()/*: Promise<ResponseGetSleepSummary>*/ => {
-		const resp = await this.httpClient.get('/sleep?action=getsummary');
-		await this.db.set('/data/sleep/summary/response',resp);
-		return resp
+	getSleepSummaryRequest = async () => {
+		const response = await this.httpClient.get('/sleep?action=getsummary');
+		await this.db.set('/data/sleep/summary/response',response);
+		return response
 	};
+
+	getMeasActivityRequest = async () => {
+		const response = await this.httpClient.get('/measure?action=getactivity');
+		await this.db.set('/data/meas/activity/response',response);
+		return response
+	};
+
+	getMeasIntraDayActivityRequest = async () => {
+		const response = await this.httpClient.get('/measure?action=getintradayactivity');
+		await this.db.set('/data/meas/intradayactivity/response',response);
+		return response
+	};
+	getMeasWorkoutActivityRequest = async () => {
+		const response = await this.httpClient.get('/measure?action=getworkouts');
+		await this.db.set('/data/meas/workout/response',response);
+		return response
+	};
+
 }
 
 export const WithingsModule = new WithingsModule_Class();
