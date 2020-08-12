@@ -103,7 +103,7 @@ class WithingsMeasModule_Class
 
 
     getMeasRequest = async () => {
-        const resp = await this.httpClient;
+        const resp = await this.httpClient.get('');
         await this.db.set('/data/meas/response',resp);
         return resp
     };

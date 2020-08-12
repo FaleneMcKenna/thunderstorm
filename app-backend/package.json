@@ -20,7 +20,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "launch": "tsc --watch & firebase serve --only functions --port 5090",
+    "launch": "tsc --watch & firebase serve --only functions --port 5000",
     "lint": "tslint --project './tsconfig.json'",
     "serve": "cd .. && bash ./build-and-install.sh -lb -nb"
   },
