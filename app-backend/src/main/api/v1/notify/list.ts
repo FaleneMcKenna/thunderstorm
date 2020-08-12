@@ -26,7 +26,7 @@ import {
     ApiWithQuery,
     QueryParams
 } from "@nu-art/thunderstorm";
-import {NotifyModule} from "@modules/NotifyModule";
+import {WithingsModule} from "@modules/WithingsModule";
 
 
 type Api_ListNotify = ApiWithQuery<'/v1/notify/list', any, QueryParams>
@@ -39,7 +39,7 @@ class ServerApi_ListNotify
     }
 
     protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: void) {
-        return NotifyModule.getNotifyListRequest()
+        return WithingsModule.getNotifyListRequest()
     }
 
 }

@@ -26,7 +26,7 @@ import {
     ApiWithQuery,
     QueryParams
 } from "@nu-art/thunderstorm";
-import {WithingsMeasModule} from "@modules/WithingsMeasModule";
+import {WithingsModule} from "@modules/WithingsModule";
 
 
 type Api_ListMeas = ApiWithQuery<'/v1/measurements/list', any, QueryParams>
@@ -39,7 +39,7 @@ class ServerApi_ListMeas
     }
 
     protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: void) {
-        return WithingsMeasModule.getMeasRequest()
+        return WithingsModule.getMeasRequest()
     }
 
 }
