@@ -25,16 +25,12 @@ import {
 import {Environment} from "./config";
 import {Module} from "@nu-art/ts-common";
 import {WithingsModule} from "@modules/WithingsModule";
-import {WithingsMeasModule} from "@modules/WithingsMeasModule";
-import {NotifyModule} from "@modules/NotifyModule";
 
 const packageJson = require("./package.json");
 console.log(`Starting server v${packageJson.version} with env: ${Environment.name}`);
 
 const modules: Module[] = [
 	WithingsModule,
-	WithingsMeasModule,
-	NotifyModule
 ];
 
 module.exports = new Storm()

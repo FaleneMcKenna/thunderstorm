@@ -70,32 +70,6 @@ class WithingsModule_Class
 		this.httpClient.setDefaultHeaders({Authorization: `Bearer ${token}`})
 		this.db = FirebaseModule.createAdminSession().getDatabase();
 	}
-
-	// createBody = () => {
-	// 	return {
-	// 		"status": 0,
-	// 		"body": {
-	// 			"series": [
-	// 				{
-	// 					"deviceid": "string",
-	// 					"model": 0,
-	// 					"ecg": {
-	// 						"signalid": 0,
-	// 						"afib": 0
-	// 					},
-	// 					"bloodpressure": {
-	// 						"diastole": 0,
-	// 						"systole": 0
-	// 					},
-	// 					"heart_rate": 0,
-	// 					"timestamp": 0
-	// 				}
-	// 			],
-	// 			"offset": 0,
-	// 			"more": true
-	// 		}
-	// 	};
-	// };
 	getHeartRequest = async () => {
 		const response = await this.httpClient.get('/v2/heart?action=list');
 		await this.db.set('/data/heart/response',response);
