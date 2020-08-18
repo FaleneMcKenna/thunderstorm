@@ -21,7 +21,10 @@ import {
 	Module,
 } from "@nu-art/ts-common";
 import {HttpClient} from "../to-move/HttpClient";
-import {FirebaseModule, DatabaseWrapper} from "@nu-art/firebase/backend";
+import {
+	DatabaseWrapper,
+	FirebaseModule
+} from "@nu-art/firebase/backend";
 
 type Config = ClientIds & {
 	accessToken: string
@@ -70,62 +73,64 @@ class WithingsModule_Class
 		this.httpClient.setDefaultHeaders({Authorization: `Bearer ${token}`})
 		this.db = FirebaseModule.createAdminSession().getDatabase();
 	}
+
 	getHeartRequest = async () => {
 		const response = await this.httpClient.get('/v2/heart?action=list');
-		await this.db.set('/data/heart/response',response);
-		return response};
+		await this.db.set('/data/heart/response', response);
+		return response
+	};
 	getSleepRequest = async ()/*: Promise<ResponseGetSleep>*/ => {
 		const response = await this.httpClient.get('/v2/sleep?action=get');
-		await this.db.set('/data/sleep/response',response);
+		await this.db.set('/data/sleep/response', response);
 		return response
 	};
 
 	getSleepSummaryRequest = async () => {
 		const response = await this.httpClient.get('/v2/sleep?action=getsummary');
-		await this.db.set('/data/sleep/summary/response',response);
+		await this.db.set('/data/sleep/summary/response', response);
 		return response
 	};
 
 	getMeasActivityRequest = async () => {
 		const response = await this.httpClient.get('/v2/measure?action=getactivity');
-		await this.db.set('/data/meas/activity/response',response);
+		await this.db.set('/data/meas/activity/response', response);
 		return response
 	};
 
 	getMeasIntraDayActivityRequest = async () => {
 		const response = await this.httpClient.get('/v2/measure?action=getintradayactivity');
-		await this.db.set('/data/meas/intradayactivity/response',response);
+		await this.db.set('/data/meas/intradayactivity/response', response);
 		return response
 	};
 	getMeasWorkoutActivityRequest = async () => {
 		const response = await this.httpClient.get('/v2/measure?action=getworkouts');
-		await this.db.set('/data/meas/workout/response',response);
+		await this.db.set('/data/meas/workout/response', response);
 		return response
 	};
 	getMeasRequest = async () => {
 		const resp = await this.httpClient.get('/measure?action=getmeas');
-		await this.db.set('/data/meas/response',resp);
+		await this.db.set('/data/meas/response', resp);
 		return resp
 	};
 
 	getNotifyRequest = async () => {
 		const response = await this.httpClient.get('/notify?action=get');
-		await this.db.set('/data/notify/response',response);
+		await this.db.set('/data/notify/response', response);
 		return response
 	};
 	getNotifyListRequest = async () => {
 		const response = await this.httpClient.get('/notify?action=list');
-		await this.db.set('/data/notify/list',response);
+		await this.db.set('/data/notify/list', response);
 		return response
 	};
 	getNotifySubscribeRequest = async () => {
-		const response = await this.httpClient.get('/notify?action=subscribe');
-		await this.db.set('/data/notify/subscribe',response);
+		const response = await this.httpClient.post('/notify', {action: 'subscribe', callbackUrl: '[your function api endpoint]/v1/register/auth'});
+		await this.db.set('/data/notify/subscribe', response);
 		return response
 	};
 	getNotifyUpdateRequest = async () => {
 		const response = await this.httpClient.get('/notify?action=update');
-		await this.db.set('/data/notify/update',response);
+		await this.db.set('/data/notify/update', response);
 		return response
 	};
 
