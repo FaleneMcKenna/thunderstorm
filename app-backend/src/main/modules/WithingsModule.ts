@@ -75,51 +75,51 @@ class WithingsModule_Class
 	}
 
 	getHeartRequest = async () => {
-		const response = await this.httpClient.get('/v2/heart?action=list');
+		const response = await this.httpClient.post('/v2/heart', {action: 'list'});
 		await this.db.set('/data/heart/response', response);
 		return response
 	};
 	getSleepRequest = async ()/*: Promise<ResponseGetSleep>*/ => {
-		const response = await this.httpClient.get('/v2/sleep?action=get');
+		const response = await this.httpClient.post('/v2/sleep', {startdate: '', enddate: ''});
 		await this.db.set('/data/sleep/response', response);
 		return response
 	};
 
 	getSleepSummaryRequest = async () => {
-		const response = await this.httpClient.get('/v2/sleep?action=getsummary');
+		const response = await this.httpClient.post('/v2/sleep', {action: 'getsummary', lastupdate: ''});
 		await this.db.set('/data/sleep/summary/response', response);
 		return response
 	};
 
 	getMeasActivityRequest = async () => {
-		const response = await this.httpClient.get('/v2/measure?action=getactivity');
+		const response = await this.httpClient.post('/v2/measure?action=getactivity', {action: 'getactivity', lastupdate: ''});
 		await this.db.set('/data/meas/activity/response', response);
 		return response
 	};
 
 	getMeasIntraDayActivityRequest = async () => {
-		const response = await this.httpClient.get('/v2/measure?action=getintradayactivity');
+		const response = await this.httpClient.post('/v2/measure', {action: 'getintradayactivity'});
 		await this.db.set('/data/meas/intradayactivity/response', response);
 		return response
 	};
 	getMeasWorkoutActivityRequest = async () => {
-		const response = await this.httpClient.get('/v2/measure?action=getworkouts');
+		const response = await this.httpClient.post('/v2/measure', {action: 'getworkout', lastupdate: ''});
 		await this.db.set('/data/meas/workout/response', response);
 		return response
 	};
 	getMeasRequest = async () => {
-		const resp = await this.httpClient.get('/measure?action=getmeas');
+		const resp = await this.httpClient.post('/measure', {action: 'getmeas'});
 		await this.db.set('/data/meas/response', resp);
 		return resp
 	};
 
 	getNotifyRequest = async () => {
-		const response = await this.httpClient.get('/notify?action=get');
+		const response = await this.httpClient.post('/notify', {action: 'get', callbackUrl: '[your function api endpoint]/v1/register/auth'});
 		await this.db.set('/data/notify/response', response);
 		return response
 	};
 	getNotifyListRequest = async () => {
-		const response = await this.httpClient.get('/notify?action=list');
+		const response = await this.httpClient.post('/notify', {action: 'list'});
 		await this.db.set('/data/notify/list', response);
 		return response
 	};
@@ -129,8 +129,20 @@ class WithingsModule_Class
 		return response
 	};
 	getNotifyUpdateRequest = async () => {
-		const response = await this.httpClient.get('/notify?action=update');
+		const response = await this.httpClient.post('/notify', {action: 'update', callbackUrl: '[your function api endpoint]/v1/register/auth', appli: '', comment: ''});
 		await this.db.set('/data/notify/update', response);
+		return response
+	};
+
+	getAccessToken = async () => {
+		const response = await this.httpClient.post('/oauth2', {action: 'requesttoken', grant_type: 'authorization_code', client_id: '', client_secret: '', code: '', redirect_uri: ''});
+		await this.db.set('/auth/accessToken', response);
+		return response
+	};
+
+	getRefreshToken = async () => {
+		const response = await this.httpClient.post('/oauth2', {action: 'requesttoken', grant_type: 'refresh_token', client_id: '', client_secret: '', refresh_token: ''});
+		await this.db.set('/auth/refreshToken', response);
 		return response
 	};
 

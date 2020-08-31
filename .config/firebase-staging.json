@@ -16,7 +16,7 @@
     "public": "app-frontend/dist/dev",
     "rewrites": [
       {
-        "source": "**",
+        "source": "dev",
         "destination": "/index.html"
       }
     ]
