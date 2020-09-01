@@ -114,7 +114,7 @@ class WithingsModule_Class
 	};
 
 	getNotifyRequest = async () => {
-		const response = await this.httpClient.post('/notify', {action: 'get', callbackUrl: '[your function api endpoint]/v1/register/auth'});
+		const response = await this.httpClient.post('/notify', {action: 'get', callbackUrl: 'https://us-central1-local-falene-ts.cloudfunctions.net/api/v1/register/auth'});
 		await this.db.set('/data/notify/response', response);
 		return response
 	};
@@ -124,18 +124,18 @@ class WithingsModule_Class
 		return response
 	};
 	getNotifySubscribeRequest = async () => {
-		const response = await this.httpClient.post('/notify', {action: 'subscribe', callbackUrl: '[your function api endpoint]/v1/register/auth'});
+		const response = await this.httpClient.post('/notify', {action: 'subscribe', callbackUrl: 'https://us-central1-local-falene-ts.cloudfunctions.net/api/v1/register/auth'});
 		await this.db.set('/data/notify/subscribe', response);
 		return response
 	};
 	getNotifyUpdateRequest = async () => {
-		const response = await this.httpClient.post('/notify', {action: 'update', callbackUrl: '[your function api endpoint]/v1/register/auth', appli: '', comment: ''});
+		const response = await this.httpClient.post('/notify', {action: 'update', callbackUrl: 'https%3A%2F%2Fus-central1-local-falene-ts.cloudfunctions.net%2Fapi', appli: '1', comment: ''});
 		await this.db.set('/data/notify/update', response);
 		return response
 	};
 
 	getAccessToken = async () => {
-		const response = await this.httpClient.post('/oauth2', {action: 'requesttoken', grant_type: 'authorization_code', client_id: '', client_secret: '', code: '', redirect_uri: ''});
+		const response = await this.httpClient.post('/oauth2', {action: 'access_token', grant_type: 'authorization_code', client_id: '', client_secret: '', code: '', redirect_uri: ''});
 		await this.db.set('/auth/accessToken', response);
 		return response
 	};

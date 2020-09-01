@@ -26,6 +26,7 @@ import {Environment} from "./config";
 import {Module} from "@nu-art/ts-common";
 import {WithingsModule} from "@modules/WithingsModule";
 import {NodeListener} from '@modules/NodeListener';
+import functions from "firebase";
 
 const packageJson = require("./package.json");
 console.log(`Starting server v${packageJson.version} with env: ${Environment.name}`);
@@ -35,10 +36,21 @@ const modules: Module[] = [
 	NodeListener
 ];
 
-module.exports = new Storm()
+const _exports = new Storm()
 	.addModules(...modules)
 	.setInitialRouteResolver(new RouteResolver(require, __dirname, "api"))
 	.setInitialRoutePath("/api")
 	.setEnvironment(Environment.name)
 	.build(async () => {
 	});
+_exports.test = functions.database.ref('triggerGet').onWrite(() => {
+	console.log('LOGGING STRING');
+	console.log({
+		firstProps: 'string prop',
+		secondProps: {
+			a: 'nested object prop',
+			b: 10000
+		}
+	});
+})
+module.exports = _exports

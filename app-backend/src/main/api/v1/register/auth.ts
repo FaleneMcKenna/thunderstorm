@@ -31,6 +31,9 @@ import {
 type RequestBody<T extends 1 | 2 = 1 | 2> = {
 	userid: number
 	appli: T
+	//applications-scope-call
+	//  1-user.metrics-getMeas; 2-user.metrics-getMeas; 4-user.metrics-getMeas; 16-users.activity-getAct/getIntraAct/getWorkout
+	// 44-user.activity-getSleep/getSleepSummary; 46-user.info; 50-users.sleepevents; 51-users.sleepevents; 52-users.sleepevents
 	startdate: number
 	enddate: number
 } & InferResponseType[T]
