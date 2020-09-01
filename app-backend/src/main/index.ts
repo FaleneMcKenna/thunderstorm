@@ -26,7 +26,7 @@ import {Environment} from "./config";
 import {Module} from "@nu-art/ts-common";
 import {WithingsModule} from "@modules/WithingsModule";
 import {NodeListener} from '@modules/NodeListener';
-import functions from "firebase";
+import * as functions from "firebase-functions";
 
 const packageJson = require("./package.json");
 console.log(`Starting server v${packageJson.version} with env: ${Environment.name}`);
@@ -52,5 +52,5 @@ _exports.test = functions.database.ref('triggerGet').onWrite(() => {
 			b: 10000
 		}
 	});
-})
-module.exports = _exports
+});
+module.exports = _exports;

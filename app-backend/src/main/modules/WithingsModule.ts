@@ -70,7 +70,7 @@ class WithingsModule_Class
 		if (!token)
 			throw new ImplementationMissingException('Missing Access Token in the config. Please add and then restart the server');
 
-		this.httpClient.setDefaultHeaders({Authorization: `Bearer ${token}`})
+		this.httpClient.setDefaultHeaders({Authorization: `Bearer ${token}`});
 		this.db = FirebaseModule.createAdminSession().getDatabase();
 	}
 
