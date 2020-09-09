@@ -1,0 +1,46 @@
+@startuml
+title
+ My first uml =)
+end title
+
+actor "Falene\nQS" as fa #lightGreen
+actor "Alan\nQS" as alan #Orange
+participant "QStudio" as qstudio
+database "Firestore" as firestore
+database "git repo" as git
+participant "Kasper" as kasper #lightGray
+
+alan -> qstudio: Create Project Workspace
+
+== Load resource ==
+alan -> qstudio: Load plan P(v)
+qstudio -> firestore: Load plan P(v)
+firestore <-> git: If plan P(v) doesn't exists
+qstudio <- firestore: plan P(v)
+alan <- qstudio: plan P(v)
+alan -> qstudio: edits P(v)
+...
+
+== GetAccounts ==
+alan -> qstudio: share Workspace with fa
+qstudio -> kasper: share Workspace with fa
+fa -> qstudio: Load plan P(v)
+qstudio <-> firestore: Load plan P(v)
+fa <- qstudio: plan P(v)
+fa -> qstudio: edits P(v)
+...
+
+== Release candidate ==
+alan -> qstudio: create a new RC P(v)
+qstudio <-> firestore: get P(v)
+qstudio -> git: create a branch for P(v)
+...
+
+== Approve & Publish ==
+fa -> qstudio: run plan P(v)
+fa -> fa: yey.. it works well
+fa -> qstudio: deploy P(v)
+qstudio -> git: create and merge P(v) to master
+
+== Everybody happy ==
+@enduml
