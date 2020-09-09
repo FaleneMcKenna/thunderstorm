@@ -55,19 +55,19 @@ class ServerApi_RegisterAuth
 	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: RequestBody) {
 	    switch (body.appli) {
           case 1:
-              this.doSomething();
+              this.sendAccessToken();
               break;
           case 2:
-              this.doElse();
+              this.sendRefreshToken();
       }
 		// use the data they provide to update the unit/db
 	}
 
-    private doSomething() {
+    private sendAccessToken() {
 
     }
 
-    private doElse() {
+    private sendRefreshToken() {
 
     }
 }

@@ -32,7 +32,7 @@ export class NodeListener_Class
 	extends FirebaseFunctionModule<TypeNode> {
 
 	constructor() {
-		super(`/listen/to/this/{nodeName}/{other}`);
+		super(`/data/notify/update`);
 		this.onFunctionReady = this.onFunctionReady.bind(this);
 	}
 
