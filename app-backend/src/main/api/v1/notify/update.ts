@@ -39,7 +39,7 @@ class ServerApi_NotifyUpdate
     }
 
     protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: void) {
-        return WithingsModule.getNotifyUpdateRequest()
+        return WithingsModule.postNotifyUpdateRequest()
     }
 
 }

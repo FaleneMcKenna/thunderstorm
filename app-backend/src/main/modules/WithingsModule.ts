@@ -128,7 +128,7 @@ class WithingsModule_Class
 		await this.db.set('/data/notify/subscribe', response);
 		return response
 	};
-	getNotifyUpdateRequest = async () => {
+	postNotifyUpdateRequest = async () => {
 		const response = await this.httpClient.post('/notify', {action: 'update', callbackUrl: 'https%3A%2F%2Fus-central1-local-falene-ts.cloudfunctions.net%2Fapi', appli: '1', comment: ''});
 		await this.db.set('/data/notify/update', response);
 		return response

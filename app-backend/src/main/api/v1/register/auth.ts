@@ -26,11 +26,13 @@ import {
 	ApiWithBody,
 	QueryParams
 } from "@nu-art/thunderstorm";
+import set = Reflect.set;
+import {WithingsAuthModule} from "@modules/WithingsAuthModule";
 
 
 type RequestBody<T extends 1 | 2 = 1 | 2> = {
 	userid: number
-	appli: T
+	measurement: T
 	//applications-scope-call
 	//  1-user.metrics-getMeas; 2-user.metrics-getMeas; 4-user.metrics-getMeas; 16-users.activity-getAct/getIntraAct/getWorkout
 	// 44-user.activity-getSleep/getSleepSummary; 46-user.info; 50-users.sleepevents; 51-users.sleepevents; 52-users.sleepevents
@@ -39,8 +41,18 @@ type RequestBody<T extends 1 | 2 = 1 | 2> = {
 } & InferResponseType[T]
 
 type InferResponseType = {
-    1: {},
-    2: {}
+    1: {
+    	let appliMeasurement = new RequestBody<number>();
+		appliMeasurement.measurement = 1
+		return 1
+	}
+    	//user.metrics: 1, 2, 3, 4
+    2: {
+		let appliMeasurement = new RequestBody<number>();
+		appliMeasurement.measurement = 52
+		return 1
+    	//(sleep) user.activity: 44, 46, 50, 51, 52
+	}
 }
 
 type Api_RegisterAuth = ApiWithBody<'/v1/register/auth', RequestBody, void>
@@ -53,9 +65,9 @@ class ServerApi_RegisterAuth
 	}
 
 	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: RequestBody) {
-	    switch (body.appli) {
+	    switch (body.measurement) {
           case 1:
-              this.sendAccessToken();
+              this.sendAuthenticationCode();
               break;
           case 2:
               this.sendRefreshToken();
@@ -63,7 +75,11 @@ class ServerApi_RegisterAuth
 		// use the data they provide to update the unit/db
 	}
 
-    private sendAccessToken() {
+    private sendAuthenticationCode = async () => {
+		const response = await WithingsAuthModule.createBody();
+		// @ts-ignore
+		set('/auth/authenticationCode', response);
+		return response
 
     }
 

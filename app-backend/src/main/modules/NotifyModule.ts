@@ -103,7 +103,7 @@
 //         await this.db.set('/data/notify/subscribe',response);
 //         return response
 //     };
-//     getNotifyUpdateRequest = async () => {
+//     postNotifyUpdateRequest = async () => {
 //         const response = await this.httpClient.get('update');
 //         await this.db.set('/data/notify/update',response);
 //         return response
