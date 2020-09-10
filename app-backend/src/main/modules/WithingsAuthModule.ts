@@ -21,21 +21,29 @@ export type AuthType = {
 	redirect_uri: string
 	client_id: string
 };
+type Configs = {
+	client_id: string
+	state: string
+	redirect_uri?: string
+}
 
 const Unit_Collection = 'units';
 
 export class WithingsAuthModule_Class
-	extends Module {
+	extends Module<Configs> {
 	private httpClient = new HttpClient("https://");
 	private db!: DatabaseWrapper;
 	private firestore!: FirestoreWrapper;
 	private unitCollection!: FirestoreCollection<DB_Unit>;
 
 	protected init(): void {
+		//TODO validate you have the right config
+
 		let session = FirebaseModule.createAdminSession();
 		this.db = session.getDatabase();
-		this.firestore = session.getFirestore()
+		this.firestore = session.getFirestore();
 		this.unitCollection = this.firestore.getCollection<DB_Unit>(Unit_Collection, ['unitId'])
+		this.getAuth('ir-qa-012', 'elliq').catch();
 	}
 
 	createBody: () => AuthType = () => {
@@ -47,23 +55,33 @@ export class WithingsAuthModule_Class
 			'redirect_uri': ''
 		};
 	};
+
 	getAuth = async (unitId: string, product: string) => {
 		// Here create request per "unit"
 		// @ts-ignore
-		const key = this.getKey(unitId, product);
-		const response: { json: AuthType } = await this.httpClient.get('account.withings.com/oauth2_user/authorize2', {
+		// const key = this.getKey(unitId, product);
+		// const response: { json: AuthType } = await this.httpClient.get('account.withings.com/oauth2_user/authorize2', {
+		// 	response_type: 'code',
+		// 	client_id: this.config.client_id,
+		// 	state: this.config.state,
+		// 	scope: 'user.metrics',
+		// 	redirect_uri: this.config?.redirect_uri || encodeURI("https://us-central1-local-falene-ts.cloudfunctions.net/api")
+		// });
+		//
+		return this.httpClient.buildUrl('account.withings.com/oauth2_user/authorize2', {
 			response_type: 'code',
-			client_id: 'client_id',
-			state: '',
+			client_id: this.config.client_id,
+			state: `${unitId}__${product}`,
 			scope: 'user.metrics',
-			redirect_uri: '"https%3A%2F%2Fus-central1-local-falene-ts.cloudfunctions.net%2Fapi"'
+			redirect_uri: encodeURI(this.config?.redirect_uri || "https://us-central1-local-falene-ts.cloudfunctions.net/api")
 		});
-		await this.unitCollection.upsert({unitId, product, auth: response.json});
-		// await this.db.set('/auth/response', response);
-		return response
+		// console.log(response);
+		// await this.unitCollection.upsert({unitId, product, auth: response.json});
+		// // await this.db.set('/auth/response', response);
+		// return response
 	};
 
-	private getKey = (unitId: string, product: string) => `${unitId}_${product}`;
+	getKey = (unitId: string, product: string) => `${unitId}_${product}`;
 
 	async postRefresh() {
 		const authResponse = await this.getAuth('ir-qa-012', 'elliq');
@@ -72,7 +90,7 @@ export class WithingsAuthModule_Class
 		return rsp
 	}
 
-	async auth(body: RequestAuthBody) {
+	async registerAuth(body: RequestAuthBody) {
 		switch (body.measurement) {
 			case 1:
 				await this.sendAuthenticationCode();

@@ -16,15 +16,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-	ImplementationMissingException,
-	Module,
-} from "@nu-art/ts-common";
+import {Module,} from "@nu-art/ts-common";
 import {HttpClient} from "../to-move/HttpClient";
 import {
 	DatabaseWrapper,
-	FirebaseModule
+	FirebaseModule,
+	FirestoreCollection
 } from "@nu-art/firebase/backend";
+import {
+	CoreOptions,
+	UriOptions
+} from "request";
+import {ApiException} from "@nu-art/thunderstorm/backend";
 
 type Config = ClientIds & {
 	accessToken: string
@@ -58,20 +61,33 @@ export type WithingsRefreshToken = ClientIds & {
 	grant_type: "refresh_token"
 	refresh_token: string
 };
+export const TokenCollection = 'tokens'
 
+export type Unit = {
+	unitId: string
+	product: string
+};
+export type DB_Tokens = Unit & {
+	accessToken: string
+	refreshToken: string
+	expirationTime: number
+}
 
 class WithingsModule_Class
 	extends Module<Config> {
-	private httpClient = new HttpClient("https://wbsapi.withings.net");
 	private db!: DatabaseWrapper;
+	private httpClient: HttpClient;
+	private tokens!: FirestoreCollection<DB_Tokens>;
+
+	constructor() {
+		super();
+		this.httpClient = new HttpClient("https://wbsapi.withings.net").addMiddleware(this.resolveAccessToken);
+	}
 
 	protected init(): void {
-		const token = this.config.accessToken;
-		if (!token)
-			throw new ImplementationMissingException('Missing Access Token in the config. Please add and then restart the server');
-
-		this.httpClient.setDefaultHeaders({Authorization: `Bearer ${token}`});
-		this.db = FirebaseModule.createAdminSession().getDatabase();
+		let session = FirebaseModule.createAdminSession();
+		this.db = session.getDatabase();
+		this.tokens = session.getFirestore().getCollection<DB_Tokens>(TokenCollection, ["unitId", "product"])
 	}
 
 	getHeartRequest = async () => {
@@ -146,6 +162,21 @@ class WithingsModule_Class
 		return response
 	};
 
+	private resolveAccessToken = async (body: UriOptions & CoreOptions) => {
+		const token = await this.resolveAccessTokenImpl(body)
+
+		this.httpClient.setDefaultHeaders({Authorization: `Bearer ${token}`});
+	};
+
+	private async resolveAccessTokenImpl(body: UriOptions & CoreOptions): Promise<string> {
+		const unitId = body.body.unitId; // put hardcoded value
+		const product = body.body.product; // put hardcoded value
+		const doc = await this.tokens.queryUnique({where: {unitId, product}})
+		if (!doc)
+			throw new ApiException(404, 'Missing auth token');
+
+		return doc.accessToken;
+	}
 }
 
 export const WithingsModule = new WithingsModule_Class();

@@ -1,44 +1,59 @@
 @startuml
 participant "Withings\nDevice" as device #lightGray
 participant "ElliQ" as eq
-database "Firebase" as firebase
 database "Firestore" as firestore
-
+participant "BE" as be
+participant "FE" as fe
 participant "Listener\nNotify" as notify
-database "Withings" as withings
-participant "OAuth2" as oauth2
-actor "user" as user #purple
-group authentication
-    firestore -> oauth2: get Auth Token
+database "Withings Api" as withings
+participant "Withings OAuth2" as oauth2
+actor "user" as user #orange
+group authentication in middleware
+    user -> fe: init auth
+    fe -> be: requests url
+    be -> be: Build oauth2 url
+    be -> fe: sends back url
+    fe -> oauth2: redirect to login page using url
+    oauth2 -> be: token + relyState which contains unit data
+    be -> firestore: upsert access token with unit data
+
+
+    '   WithingsAuthModule.getAuth
+    be -> oauth2: get Auth Token
     note left: TBD on how to link
     oauth2-> user: ask for confirmation
-    user->oauth2: confirmation
-    oauth2-> firestore: give AuthToken
+    user -> oauth2: confirmation
+
+    oauth2 -> be: give AuthToken
     note left: by unit in project
-    firestore->oauth2: send AuthToken to get AccessToken
-    oauth2->firestore: give accessToken & RefreshToken
+    be -> oauth2: send AuthToken to get AccessToken
+    oauth2 -> be: give accessToken & RefreshToken
     note left: refresh token expires after 1 year
-    firestore->firebase: write tokens \nto node
+    be <-> firestore: save accessToken & RefreshToken
     loop refresh authorization
-    hnote over firebase: wait
-    firebase->oauth2: request new accessToken
+    hnote over firestore: wait
+    be -> oauth2: request new accessToken
     note left: the time before refresh is given in\nthe body of the AccessToken\n(should be 3 hours)
 
-    oauth2->firestore: give new accessToken
-    firestore->firebase: write tokens \nto node
+    oauth2 -> be: give new accessToken
+    be -> firestore: write tokens \nto node
     end
 end
-firestore->notify: Subscribes to get notifications\n when data is available.
 
-user->device: use device
-device->withings: sends data usage
-notify<--withings: triggers \nNotify
-notify->firestore: writes to update Node
-firestore-->firestore: update Node change \ntriggers API calls
+== Usage ==
 
-firestore->withings: POST request triggers, asks for new data
-withings->firestore: replies with JSON
-firestore-->firestore: writes JSON to node
+group subscription
+    be -> notify: Subscribes to get notifications\n when data is available.
+    note left #pink: Using the authentication retrieved above and saved in firestore
+end
+
+user -> device: use device
+device -> withings: sends data usage
+notify <-- withings: triggers \nNotify
+notify -> be: api triggered
+be -> withings: POST request triggers, asks for new data
+withings -> be: replies with JSON
+be -> firestore: writes JSON to collection
 
 group Plan Usage Level
     eq->firestore: checks for available data

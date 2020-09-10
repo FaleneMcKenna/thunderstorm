@@ -27,12 +27,14 @@ import {Module} from "@nu-art/ts-common";
 import {WithingsModule} from "@modules/WithingsModule";
 import {NodeListener} from '@modules/NodeListener';
 import * as functions from "firebase-functions";
+import {WithingsAuthModule} from "@modules/WithingsAuthModule";
 
 const packageJson = require("./package.json");
 console.log(`Starting server v${packageJson.version} with env: ${Environment.name}`);
 
 const modules: Module[] = [
 	WithingsModule,
+	WithingsAuthModule,
 	NodeListener
 ];
 
@@ -46,11 +48,11 @@ const _exports = new Storm()
 _exports.test = functions.database.ref('triggerGet').onWrite(() => {
 	console.log('LOGGING STRING');
 	console.log({
-		firstProps: 'string prop',
-		secondProps: {
-			a: 'nested object prop',
-			b: 10000
-		}
-	});
+		            firstProps: 'string prop',
+		            secondProps: {
+			            a: 'nested object prop',
+			            b: 10000
+		            }
+	            });
 });
 module.exports = _exports;

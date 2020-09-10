@@ -48,7 +48,7 @@ class ServerApi_RegisterAuth
 	}
 
 	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: RequestAuthBody) {
-		await WithingsAuthModule.auth(body)
+		await WithingsAuthModule.registerAuth(body)
 		// use the data they provide to update the unit/db
 	}
 }

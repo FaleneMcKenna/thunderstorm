@@ -16,13 +16,21 @@ import {
 } from "@nu-art/ts-common";
 import {Headers} from 'request'
 
+type Middleware = (body: UriOptions & CoreOptions) => Promise<void>;
+
 export class HttpClient {
 
 	private defaultHeaders!: Headers;
 	private readonly baseUrl: string;
+	private middlewares: Middleware[] = [];
 
 	constructor(baseUrl: string) {
 		this.baseUrl = baseUrl;
+	}
+
+	addMiddleware(middleWare: Middleware){
+		this.middlewares.push(middleWare);
+		return this;
 	}
 
 	setDefaultHeaders(defaultHeaders: Headers) {
@@ -30,6 +38,16 @@ export class HttpClient {
 	}
 
 	get(path: string, _params?: StringMap, headers?: Headers) {
+		const request: UriOptions & CoreOptions = {
+			headers: {...this.defaultHeaders, headers},
+			uri: this.buildUrl(path, _params),
+			method: HttpMethod.GET,
+			json: true
+		};
+		return this.executeRequest(request);
+	}
+
+	buildUrl = (path: string, _params?: StringMap) => {
 		let url = `${this.baseUrl}${path}`;
 
 		let nextOperator = "?"
@@ -46,15 +64,8 @@ export class HttpClient {
 				nextOperator = "&";
 				return temp;
 			}, url);
-
-		const request: UriOptions & CoreOptions = {
-			headers: {...this.defaultHeaders, headers},
-			uri: `${url}`,
-			method: HttpMethod.GET,
-			json: true
-		};
-		return this.executeRequest(request);
-	}
+		return url;
+	};
 
 	post(path: string, body: any, headers?: Headers) {
 		const request: UriOptions & CoreOptions = {
@@ -80,6 +91,7 @@ export class HttpClient {
 	}
 
 	private async executeRequest(body: UriOptions & CoreOptions) {
+		await this.processMiddlewares(body);
 		const response = await promisifyRequest(body, false);
 		const statusCode = response.statusCode;
 		if (statusCode >= 200 && statusCode < 300)
@@ -90,5 +102,9 @@ export class HttpClient {
 			throw new ApiException(statusCode, `Http request failed without error message: ${__stringify(body, true)}`)
 
 		throw new ApiException<any>(statusCode, `Http request failed: ${errorResponse} \n For Request: ${__stringify(body, true)}`);
+	}
+
+	private async processMiddlewares(body: UriOptions & CoreOptions) {
+		await Promise.all(this.middlewares.map(m => m(body)))
 	}
 }
