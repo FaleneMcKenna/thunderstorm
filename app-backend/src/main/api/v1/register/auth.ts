@@ -36,7 +36,6 @@ export type RequestAuthBody = {
 	// 44-user.activity-getSleep/getSleepSummary; 46-user.info; 50-users.sleepevents; 51-users.sleepevents; 52-users.sleepevents
 	startdate: number
 	enddate: number
-	appliMeasurement: number
 }
 
 type Api_RegisterAuth = ApiWithBody<'/v1/register/auth', RequestAuthBody, void>
