@@ -15,7 +15,7 @@ group authentication in middleware
     be -> fe: sends back url
     fe -> oauth2: redirect to login page using url
     oauth2 -> be: token + relyState which contains unit data
-    be -> firestore: upsert access token with unit data
+    be -> firestore: upsert AccessToken with unit data
 
 
     '   WithingsAuthModule.getAuth
@@ -29,7 +29,7 @@ group authentication in middleware
     be -> oauth2: send AuthToken to get AccessToken
     oauth2 -> be: give accessToken & RefreshToken
     note left: refresh token expires after 1 year
-    be <-> firestore: save accessToken & RefreshToken
+    be <-> firestore: save Access & Refresh Token
     loop refresh authorization
     hnote over firestore: wait
     be -> oauth2: request new accessToken
@@ -44,7 +44,7 @@ end
 
 group subscription
     be -> notify: Subscribes to get notifications\n when data is available.
-    note left #pink: Using the authentication retrieved above and saved in firestore
+    note left #pink: Using the authentication retrieved \nabove and saved in firestore
 end
 
 user -> device: use device
