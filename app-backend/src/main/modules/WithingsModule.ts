@@ -16,7 +16,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Module,} from "@nu-art/ts-common";
+import {
+	currentTimeMillies,
+	Module,
+} from "@nu-art/ts-common";
 import {HttpClient} from "../to-move/HttpClient";
 import {
 	DatabaseWrapper,
@@ -61,7 +64,7 @@ export type WithingsRefreshToken = ClientIds & {
 	grant_type: "refresh_token"
 	refresh_token: string
 };
-export const TokenCollection = 'tokens'
+export const TokenCollection = 'tokens';
 
 export type Unit = {
 	unitId: string
@@ -73,11 +76,20 @@ export type DB_Tokens = Unit & {
 	expirationTime: number
 }
 
+const MeasCollection = 'meas';
+
+export type DB_Meas = {
+	unitId: string
+	timestamp: number
+	// need to add the rest of the data you should be saving
+}
+
 class WithingsModule_Class
 	extends Module<Config> {
 	private db!: DatabaseWrapper;
 	private httpClient: HttpClient;
 	private tokens!: FirestoreCollection<DB_Tokens>;
+	private meas!: FirestoreCollection<DB_Meas>;
 
 	constructor() {
 		super();
@@ -87,83 +99,95 @@ class WithingsModule_Class
 	protected init(): void {
 		let session = FirebaseModule.createAdminSession();
 		this.db = session.getDatabase();
-		this.tokens = session.getFirestore().getCollection<DB_Tokens>(TokenCollection, ["unitId", "product"])
+		let firestore = session.getFirestore();
+		this.tokens = firestore.getCollection<DB_Tokens>(TokenCollection, ["unitId", "product"]);
+		this.meas = firestore.getCollection<DB_Meas>(MeasCollection, ['unitId', 'timestamp']);
 	}
 
 	getHeartRequest = async () => {
 		const response = await this.httpClient.post('/v2/heart', {action: 'list'});
 		await this.db.set('/data/heart/response', response);
-		return response
+		return response;
 	};
 	getSleepRequest = async ()/*: Promise<ResponseGetSleep>*/ => {
 		const response = await this.httpClient.post('/v2/sleep', {startdate: '', enddate: ''});
 		await this.db.set('/data/sleep/response', response);
-		return response
+		return response;
 	};
 
 	getSleepSummaryRequest = async () => {
 		const response = await this.httpClient.post('/v2/sleep', {action: 'getsummary', lastupdate: ''});
 		await this.db.set('/data/sleep/summary/response', response);
-		return response
+		return response;
 	};
 
 	getMeasActivityRequest = async () => {
 		const response = await this.httpClient.post('/v2/measure?action=getactivity', {action: 'getactivity', lastupdate: ''});
 		await this.db.set('/data/meas/activity/response', response);
-		return response
+		return response;
 	};
 
 	getMeasIntraDayActivityRequest = async () => {
 		const response = await this.httpClient.post('/v2/measure', {action: 'getintradayactivity'});
 		await this.db.set('/data/meas/intradayactivity/response', response);
-		return response
+		return response;
 	};
+
 	getMeasWorkoutActivityRequest = async () => {
 		const response = await this.httpClient.post('/v2/measure', {action: 'getworkout', lastupdate: ''});
 		await this.db.set('/data/meas/workout/response', response);
-		return response
+		return response;
 	};
-	getMeasRequest = async () => {
+
+	getMeasRequest = async (unitId: string) => {
 		const resp = await this.httpClient.post('/measure', {action: 'getmeas'});
+
+		const doc: DB_Meas = {
+			unitId: unitId,
+			timestamp: currentTimeMillies() // should be something like resp.timestamp
+			///..... the rest
+		};
+		await this.meas.upsert(doc);
+
 		await this.db.set('/data/meas/response', resp);
-		return resp
+		return resp;
 	};
 
 	getNotifyRequest = async () => {
 		const response = await this.httpClient.post('/notify', {action: 'get', callbackUrl: 'https://us-central1-local-falene-ts.cloudfunctions.net/api/v1/register/auth'});
 		await this.db.set('/data/notify/response', response);
-		return response
+		return response;
 	};
 	getNotifyListRequest = async () => {
 		const response = await this.httpClient.post('/notify', {action: 'list'});
 		await this.db.set('/data/notify/list', response);
-		return response
+		return response;
 	};
 	getNotifySubscribeRequest = async () => {
 		const response = await this.httpClient.post('/notify', {action: 'subscribe', callbackUrl: 'https://us-central1-local-falene-ts.cloudfunctions.net/api/v1/register/auth'});
 		await this.db.set('/data/notify/subscribe', response);
-		return response
+		return response;
 	};
 	postNotifyUpdateRequest = async () => {
 		const response = await this.httpClient.post('/notify', {action: 'update', callbackUrl: 'https%3A%2F%2Fus-central1-local-falene-ts.cloudfunctions.net%2Fapi', appli: '1', comment: ''});
 		await this.db.set('/data/notify/update', response);
-		return response
+		return response;
 	};
 
 	getAccessToken = async () => {
 		const response = await this.httpClient.post('/oauth2', {action: 'access_token', grant_type: 'authorization_code', client_id: '', client_secret: '', code: '', redirect_uri: ''});
 		await this.db.set('/auth/accessToken', response);
-		return response
+		return response;
 	};
 
 	getRefreshToken = async () => {
 		const response = await this.httpClient.post('/oauth2', {action: 'requesttoken', grant_type: 'refresh_token', client_id: '', client_secret: '', refresh_token: ''});
 		await this.db.set('/auth/refreshToken', response);
-		return response
+		return response;
 	};
 
 	private resolveAccessToken = async (body: UriOptions & CoreOptions) => {
-		const token = await this.resolveAccessTokenImpl(body)
+		const token = await this.resolveAccessTokenImpl(body);
 
 		this.httpClient.setDefaultHeaders({Authorization: `Bearer ${token}`});
 	};
@@ -171,7 +195,7 @@ class WithingsModule_Class
 	private async resolveAccessTokenImpl(body: UriOptions & CoreOptions): Promise<string> {
 		const unitId = body.body.unitId; // put hardcoded value
 		const product = body.body.product; // put hardcoded value
-		const doc = await this.tokens.queryUnique({where: {unitId, product}})
+		const doc = await this.tokens.queryUnique({where: {unitId, product}});
 		if (!doc)
 			throw new ApiException(404, 'Missing auth token');
 
