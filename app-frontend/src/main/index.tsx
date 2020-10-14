@@ -19,9 +19,13 @@
 // tslint:disable:no-import-side-effect
 import './res/styles/styles.scss';
 import {App} from "./app/App";
-import {Thunder} from "@nu-art/thunderstorm/frontend";
+import {
+	HttpModule,
+	Thunder
+} from "@nu-art/thunderstorm/frontend";
 
 new Thunder()
 	.setConfig(require("./config").config)
+	.addModules(HttpModule)
 	.setMainApp(App)
 	.build();

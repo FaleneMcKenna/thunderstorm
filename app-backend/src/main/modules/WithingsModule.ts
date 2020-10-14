@@ -91,6 +91,7 @@ class WithingsModule_Class
 	}
 
 	protected init(): void {
+		console.log(this.config.accessToken);
 		if (this.config.accessToken)
 			this.httpClient.setDefaultHeaders({Authorization: `Bearer ${this.config.accessToken}`});
 
