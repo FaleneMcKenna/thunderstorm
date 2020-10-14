@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 import {
+	AuditBy,
 	currentTimeMillies,
 	Module,
 } from "@nu-art/ts-common";
@@ -103,38 +104,42 @@ class WithingsModule_Class
 		this.tokens = firestore.getCollection<DB_Tokens>(TokenCollection, ["unitId", "product"]);
 		this.meas = firestore.getCollection<DB_Meas>(MeasCollection, ['unitId', 'timestamp']);
 	}
+	async updateMeasurements(audit: AuditBy) {
+		const meas: DB_Meas = await this.getMeasRequest("ir-qa-012");
+		await this.meas.upsert(meas);
+	}
 
 	getHeartRequest = async () => {
-		const response = await this.httpClient.post('/v2/heart', {action: 'list'});
+		const response = await this.httpClient.post('/v2/heart', {action: 'list', startdate: '1590969600', enddate: '1601769600'});
 		await this.db.set('/data/heart/response', response);
 		return response;
 	};
 	getSleepRequest = async ()/*: Promise<ResponseGetSleep>*/ => {
-		const response = await this.httpClient.post('/v2/sleep', {startdate: '', enddate: ''});
+		const response = await this.httpClient.post('/v2/sleep', {startdate: '1590969600', enddate: '1601769600'});
 		await this.db.set('/data/sleep/response', response);
 		return response;
 	};
 
 	getSleepSummaryRequest = async () => {
-		const response = await this.httpClient.post('/v2/sleep', {action: 'getsummary', lastupdate: ''});
+		const response = await this.httpClient.post('/v2/sleep', {action: 'getsummary', lastupdate: '1590969600'});
 		await this.db.set('/data/sleep/summary/response', response);
 		return response;
 	};
 
 	getMeasActivityRequest = async () => {
-		const response = await this.httpClient.post('/v2/measure?action=getactivity', {action: 'getactivity', lastupdate: ''});
+		const response = await this.httpClient.post('/v2/measure?action=getactivity', {action: 'getactivity', lastupdate: '1590969600'});
 		await this.db.set('/data/meas/activity/response', response);
 		return response;
 	};
 
 	getMeasIntraDayActivityRequest = async () => {
-		const response = await this.httpClient.post('/v2/measure', {action: 'getintradayactivity'});
+		const response = await this.httpClient.post('/v2/measure', {action: 'getintradayactivity', startdate: '1590969600', enddate: '1590969600'});
 		await this.db.set('/data/meas/intradayactivity/response', response);
 		return response;
 	};
 
 	getMeasWorkoutActivityRequest = async () => {
-		const response = await this.httpClient.post('/v2/measure', {action: 'getworkout', lastupdate: ''});
+		const response = await this.httpClient.post('/v2/measure', {action: 'getworkout', lastupdate: '1590969600'});
 		await this.db.set('/data/meas/workout/response', response);
 		return response;
 	};

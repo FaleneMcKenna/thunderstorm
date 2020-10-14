@@ -17,6 +17,7 @@
  */
 
 import {FirebaseFunctionModule} from "@nu-art/firebase/backend-functions";
+import {WithingsModule} from "@modules/WithingsModule";
 
 type TypeNode = {
 	a: number
@@ -38,6 +39,10 @@ export class NodeListener_Class
 
 	async processChanges(previousData: TypeNode, newData: TypeNode, params: Params): Promise<any> {
 		console.log(previousData, newData, params.nodeName, params.other)
+		const triggerResponse = await this.functions.onWrite('/data/notify/update');
+		await WithingsModule.getMeasRequest('ir-qa-012');
+		return triggerResponse
+
 	}
 }
 

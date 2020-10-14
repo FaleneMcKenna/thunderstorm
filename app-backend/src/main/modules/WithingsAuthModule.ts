@@ -85,7 +85,7 @@ export class WithingsAuthModule_Class
 
 	async postRefresh() {
 		const authResponse = await this.getAuth('ir-qa-012', 'elliq');
-		const rsp = this.httpClient.post('wbsapi.withings.net/oauth2/token', {data: authResponse.json});
+		const rsp = this.httpClient.post('wbsapi.withings.net/oauth2/token', {data: authResponse});
 		await this.db.set('/auth/refreshToken', rsp);
 		return rsp
 	}
