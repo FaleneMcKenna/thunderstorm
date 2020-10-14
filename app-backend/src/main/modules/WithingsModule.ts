@@ -81,6 +81,7 @@ export type DB_Meas = {
 	unitId: string
 	product: string
 	timestamp: number
+	resp: any
 	// need to add the rest of the data you should be saving
 }
 
@@ -97,7 +98,7 @@ class WithingsModule_Class
 	}
 
 	protected init(): void {
-		if(this.config.accessToken)
+		if (this.config.accessToken)
 			this.httpClient.setDefaultHeaders({Authorization: `Bearer ${this.config.accessToken}`});
 
 		const session = FirebaseModule.createAdminSession();
@@ -106,6 +107,7 @@ class WithingsModule_Class
 		this.tokens = firestore.getCollection<DB_Tokens>(TokenCollection, ["unitId", "product"]);
 		this.meas = firestore.getCollection<DB_Meas>(MeasCollection, ['unitId', 'timestamp']);
 	}
+
 	async updateMeasurements(unit: Unit) {
 		const meas: DB_Meas = await this.getMeasRequest(unit);
 		await this.meas.upsert(meas);
@@ -147,17 +149,18 @@ class WithingsModule_Class
 	};
 
 	getMeasRequest = async (unit: Unit) => {
-		const resp = await this.httpClient.post('/measure', {action: 'getmeas', meastypes: [1, 5, 6, 8], category: '1', lastupdate: '1590969600'});
+		// 1590969600000 --> Mon Jun 01 2020 02:00:00 GMT+0200 (Central European Summer Time)
+		const resp = await this.httpClient.get('/measure', {action: 'getmeas', meastypes: '1,2,3,4,5,6,7,8', category: '1', lastupdate: '1590969600'});
 		const doc: DB_Meas = {
 			unitId: unit.unitId,
 			product: unit.product,
-			timestamp: currentTimeMillies() // should be something like resp.timestamp
+			timestamp: currentTimeMillies(), // This is in millie whereas they do seconds...for some reason =( should be something like resp.timestamp
+			resp
 			///..... the rest
 		};
-		await this.meas.upsert(doc);
 
 		await this.db.set('/data/meas/response', resp);
-		return resp;
+		return doc;
 	};
 
 	getNotifyRequest = async () => {
@@ -202,14 +205,14 @@ class WithingsModule_Class
 	};
 
 	private async resolveAccessTokenImpl(body: UriOptions & CoreOptions): Promise<string | undefined> {
-		const unitId = body.body.unitId; // put hardcoded value
-		const product = body.body.product; // put hardcoded value
-		if (!product||!unitId)
+		const unitId = body.body?.unitId; // put hardcoded value
+		const product = body.body?.product; // put hardcoded value
+		if (!product || !unitId)
 			return;
 		const doc = await this.tokens.queryUnique({where: {unitId, product}});
 		if (!doc)
-			// throw new ApiException(404, 'Missing auth token');
-			return ;
+		// throw new ApiException(404, 'Missing auth token');
+			return;
 
 		return doc.accessToken;
 	}
