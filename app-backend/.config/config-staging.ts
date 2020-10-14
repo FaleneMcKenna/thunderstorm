@@ -18,5 +18,5 @@
  */
 
 export const Environment = {
-	name: "dev"
+	name: "staging"
 };
