@@ -18,30 +18,28 @@
  */
 
 import {
-    ApiResponse,
-    ExpressRequest,
-    ServerApi_Get
+	ApiResponse,
+	ExpressRequest,
+	ServerApi_Get
 } from "@nu-art/thunderstorm/backend";
-import {
-    ApiWithQuery,
-    QueryParams
-} from "@nu-art/thunderstorm";
 import {WithingsModule} from "@modules/WithingsModule";
 
-
-type Api_ListMeas = ApiWithQuery<'/v1/measurements/list', any, QueryParams>
+import {
+	Api_ListMeas,
+	Unit
+} from "@app/app-shared";
 
 class ServerApi_ListMeas
-    extends ServerApi_Get<Api_ListMeas> {
+	extends ServerApi_Get<Api_ListMeas> {
 
-    constructor(){
-        super('list')
-    }
+	constructor() {
+		super('get');
+	}
 
-    protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: void) {
-        return WithingsModule.getMeasRequest({unitId: 'ir-qa-012', product: 'elliq'})
-    }
+	protected async process(request: ExpressRequest, response: ApiResponse, unit: Unit, body: void) {
+		return WithingsModule.getMeasRequest(unit,'2');
+	}
 
 }
 
-module.exports = new ServerApi_ListMeas()
+module.exports = new ServerApi_ListMeas();

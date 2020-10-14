@@ -30,6 +30,10 @@ import {
 	CoreOptions,
 	UriOptions
 } from "request";
+import {
+	DB_Meas,
+	Unit
+} from "@app/app-shared";
 
 type Config = ClientIds & {
 	accessToken: string
@@ -65,10 +69,6 @@ export type WithingsRefreshToken = ClientIds & {
 };
 export const TokenCollection = 'tokens';
 
-export type Unit = {
-	unitId: string
-	product: string
-};
 export type DB_Tokens = Unit & {
 	accessToken: string
 	refreshToken: string
@@ -77,13 +77,6 @@ export type DB_Tokens = Unit & {
 
 const MeasCollection = 'meas';
 
-export type DB_Meas = {
-	unitId: string
-	product: string
-	timestamp: number
-	resp: any
-	// need to add the rest of the data you should be saving
-}
 
 class WithingsModule_Class
 	extends Module<Config> {
@@ -109,8 +102,15 @@ class WithingsModule_Class
 	}
 
 	async updateMeasurements(unit: Unit) {
-		const meas: DB_Meas = await this.getMeasRequest(unit);
-		await this.meas.upsert(meas);
+		const resp: DB_Meas = await this.getMeasRequest(unit);
+		const doc: DB_Meas = {
+			unitId: unit.unitId,
+			product: unit.product,
+			timestamp: currentTimeMillies(), // This is in millie whereas they do seconds...for some reason =( should be something like resp.timestamp
+			resp
+			///..... the rest
+		};
+		await this.meas.upsert(doc);
 	}
 
 	getHeartRequest = async () => {
@@ -148,19 +148,12 @@ class WithingsModule_Class
 		return response;
 	};
 
-	getMeasRequest = async (unit: Unit) => {
+	getMeasRequest = async (unit: Unit, category = '2', meastypes = ['1', '8']) => {
 		// 1590969600000 --> Mon Jun 01 2020 02:00:00 GMT+0200 (Central European Summer Time)
-		const resp = await this.httpClient.get('/measure', {action: 'getmeas', meastypes: '1,2,3,4,5,6,7,8', category: '1', lastupdate: '1590969600'});
-		const doc: DB_Meas = {
-			unitId: unit.unitId,
-			product: unit.product,
-			timestamp: currentTimeMillies(), // This is in millie whereas they do seconds...for some reason =( should be something like resp.timestamp
-			resp
-			///..... the rest
-		};
+		const resp = await this.httpClient.get('/measure', {action: 'getmeas', meastypes: meastypes.join(','), category, lastupdate: '1590969600'});
 
 		await this.db.set('/data/meas/response', resp);
-		return doc;
+		return resp;
 	};
 
 	getNotifyRequest = async () => {

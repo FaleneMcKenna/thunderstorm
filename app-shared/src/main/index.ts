@@ -16,3 +16,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {ApiWithQuery} from "@nu-art/thunderstorm";
+
+export type DB_Meas = {
+	unitId: string
+	product: string
+	timestamp: number
+	resp: any
+	// need to add the rest of the data you should be saving
+}
+export type Unit = {
+	unitId: string
+	product: string
+}
+
+export type Api_ListMeas = ApiWithQuery<'/v1/measurements/get', any, Unit>

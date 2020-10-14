@@ -21,6 +21,7 @@ import {
 	BaseComponent,
 	WrapperProps
 } from "@nu-art/thunderstorm/frontend";
+import {GetMeas} from "./pages/GetMeas";
 
 export class App
 	extends BaseComponent<WrapperProps> {
@@ -33,7 +34,7 @@ export class App
 	render() {
 		return (
 			<div onDrop={App.dropBlocker} onDragOver={App.dropBlocker}>
-				Hello World
+				<GetMeas/>
 			</div>);
 	}
 }

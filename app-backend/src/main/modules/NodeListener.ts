@@ -17,7 +17,8 @@
  */
 
 import {FirebaseFunctionModule} from "@nu-art/firebase/backend-functions";
-import {Unit, WithingsModule} from "@modules/WithingsModule";
+import {WithingsModule} from "@modules/WithingsModule";
+import {Unit} from "@app/app-shared";
 
 type Params = {
 };
