@@ -100,9 +100,9 @@ class WithingsModule_Class
 		if(this.config.accessToken)
 			this.httpClient.setDefaultHeaders({Authorization: `Bearer ${this.config.accessToken}`});
 
-		let session = FirebaseModule.createAdminSession();
+		const session = FirebaseModule.createAdminSession();
 		this.db = session.getDatabase();
-		let firestore = session.getFirestore();
+		const firestore = session.getFirestore();
 		this.tokens = firestore.getCollection<DB_Tokens>(TokenCollection, ["unitId", "product"]);
 		this.meas = firestore.getCollection<DB_Meas>(MeasCollection, ['unitId', 'timestamp']);
 	}
