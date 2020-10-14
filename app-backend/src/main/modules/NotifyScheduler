@@ -21,7 +21,6 @@ export class NotifyScheduler_Class
     // };
     onScheduledEvent = async (): Promise<any> => {
         console.log("Update Node to trigger the measurements");
-        await functions.database.ref('/data/notify/update', "true");
 
     };
 }

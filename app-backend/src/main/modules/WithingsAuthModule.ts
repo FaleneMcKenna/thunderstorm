@@ -2,13 +2,13 @@ import {HttpClient} from "../to-move/HttpClient";
 import {
 	DatabaseWrapper,
 	FirebaseModule,
-	FirestoreCollection,
-	FirestoreWrapper
+	// FirestoreCollection,
+	// FirestoreWrapper
 } from "@nu-art/firebase/backend";
 import {Module} from "@nu-art/ts-common";
 import {RequestAuthBody} from "../api/v1/register/auth";
 
-type DB_Unit = {
+export type DB_Unit = {
 	unitId: string
 	product: string
 	auth: AuthType
@@ -27,22 +27,22 @@ type Configs = {
 	redirect_uri?: string
 }
 
-const Unit_Collection = 'units';
+// const Unit_Collection = 'units';
 
 export class WithingsAuthModule_Class
 	extends Module<Configs> {
 	private httpClient = new HttpClient("https://");
 	private db!: DatabaseWrapper;
-	private firestore!: FirestoreWrapper;
-	private unitCollection!: FirestoreCollection<DB_Unit>;
+	// private firestore!: FirestoreWrapper;
+	// private unitCollection!: FirestoreCollection<DB_Unit>;
 
 	protected init(): void {
 		//TODO validate you have the right config
 
 		let session = FirebaseModule.createAdminSession();
 		this.db = session.getDatabase();
-		this.firestore = session.getFirestore();
-		this.unitCollection = this.firestore.getCollection<DB_Unit>(Unit_Collection, ['unitId'])
+		// this.firestore = session.getFirestore();
+		// this.unitCollection = this.firestore.getCollection<DB_Unit>(Unit_Collection, ['unitId'])
 		this.getAuth('ir-qa-012', 'elliq').catch();
 	}
 

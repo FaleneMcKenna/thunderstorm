@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 import {
-	AuditBy,
 	currentTimeMillies,
 	Module,
 } from "@nu-art/ts-common";
@@ -31,7 +30,6 @@ import {
 	CoreOptions,
 	UriOptions
 } from "request";
-import {ApiException} from "@nu-art/thunderstorm/backend";
 
 type Config = ClientIds & {
 	accessToken: string
@@ -81,6 +79,7 @@ const MeasCollection = 'meas';
 
 export type DB_Meas = {
 	unitId: string
+	product: string
 	timestamp: number
 	// need to add the rest of the data you should be saving
 }
@@ -104,8 +103,8 @@ class WithingsModule_Class
 		this.tokens = firestore.getCollection<DB_Tokens>(TokenCollection, ["unitId", "product"]);
 		this.meas = firestore.getCollection<DB_Meas>(MeasCollection, ['unitId', 'timestamp']);
 	}
-	async updateMeasurements(audit: AuditBy) {
-		const meas: DB_Meas = await this.getMeasRequest("ir-qa-012");
+	async updateMeasurements(unit: Unit) {
+		const meas: DB_Meas = await this.getMeasRequest(unit);
 		await this.meas.upsert(meas);
 	}
 
@@ -144,11 +143,11 @@ class WithingsModule_Class
 		return response;
 	};
 
-	getMeasRequest = async (unitId: string) => {
-		const resp = await this.httpClient.post('/measure', {action: 'getmeas'});
-
+	getMeasRequest = async (unit: Unit) => {
+		const resp = await this.httpClient.post('/measure', {action: 'getmeas', meastypes: [1, 5, 6, 8], category: '1', lastupdate: '1590969600'});
 		const doc: DB_Meas = {
-			unitId: unitId,
+			unitId: unit.unitId,
+			product: unit.product,
 			timestamp: currentTimeMillies() // should be something like resp.timestamp
 			///..... the rest
 		};
@@ -193,16 +192,21 @@ class WithingsModule_Class
 
 	private resolveAccessToken = async (body: UriOptions & CoreOptions) => {
 		const token = await this.resolveAccessTokenImpl(body);
+		if (!token)
+			return;
 
 		this.httpClient.setDefaultHeaders({Authorization: `Bearer ${token}`});
 	};
 
-	private async resolveAccessTokenImpl(body: UriOptions & CoreOptions): Promise<string> {
+	private async resolveAccessTokenImpl(body: UriOptions & CoreOptions): Promise<string | undefined> {
 		const unitId = body.body.unitId; // put hardcoded value
 		const product = body.body.product; // put hardcoded value
+		if (!product||!unitId)
+			return;
 		const doc = await this.tokens.queryUnique({where: {unitId, product}});
 		if (!doc)
-			throw new ApiException(404, 'Missing auth token');
+			// throw new ApiException(404, 'Missing auth token');
+			return ;
 
 		return doc.accessToken;
 	}

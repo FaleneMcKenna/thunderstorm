@@ -39,7 +39,7 @@ class ServerApi_ListMeas
     }
 
     protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: void) {
-        return WithingsModule.getMeasRequest()
+        return WithingsModule.getMeasRequest({unitId: 'ir-qa-012', product: 'elliq'})
     }
 
 }

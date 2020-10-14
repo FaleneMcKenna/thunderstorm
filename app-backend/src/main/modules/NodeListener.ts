@@ -17,31 +17,23 @@
  */
 
 import {FirebaseFunctionModule} from "@nu-art/firebase/backend-functions";
-import {WithingsModule} from "@modules/WithingsModule";
-
-type TypeNode = {
-	a: number
-	b: string
-};
+import {Unit, WithingsModule} from "@modules/WithingsModule";
 
 type Params = {
-	nodeName: string
-	other: string
 };
 
 export class NodeListener_Class
-	extends FirebaseFunctionModule<TypeNode> {
+	extends FirebaseFunctionModule<Unit> {
 
 	constructor() {
-		super(`/data/notify/update`);
+		super(`/notify/update`);
 		this.onFunctionReady = this.onFunctionReady.bind(this);
 	}
 
-	async processChanges(previousData: TypeNode, newData: TypeNode, params: Params): Promise<any> {
-		console.log(previousData, newData, params.nodeName, params.other)
-		const triggerResponse = await this.functions.onWrite('/data/notify/update');
-		await WithingsModule.getMeasRequest('ir-qa-012');
-		return triggerResponse
+	async processChanges(previousData: Unit, newData: Unit, params: Params): Promise<any> {
+		console.log(previousData, newData, params)
+
+		await WithingsModule.updateMeasurements(newData);
 
 	}
 }
