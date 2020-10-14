@@ -97,6 +97,9 @@ class WithingsModule_Class
 	}
 
 	protected init(): void {
+		if(this.config.accessToken)
+			this.httpClient.setDefaultHeaders({Authorization: `Bearer ${this.config.accessToken}`});
+
 		let session = FirebaseModule.createAdminSession();
 		this.db = session.getDatabase();
 		let firestore = session.getFirestore();
