@@ -1,6 +1,7 @@
 import {Module} from "@nu-art/ts-common";
 import {
 	Api_ListMeas,
+	Api_RegisterAuth,
 	Unit
 } from "@app/app-shared";
 import {HttpModule} from "@nu-art/thunderstorm/frontend";
@@ -10,6 +11,7 @@ type Config = {}
 
 type Measures = { [product: string]: { [unitId: string]: any } };
 export const RequestMeasKey = 'get-meas';
+export const RequestKeyLogin = 'login';
 
 export class MeasModule_Class
 	extends Module<Config> {
@@ -32,6 +34,19 @@ export class MeasModule_Class
 
 	getMeas(unit: Unit) {
 		return this.measures[unit.product]?.[unit.unitId];
+	}
+
+	login(unit: Unit) {
+		HttpModule
+			.createRequest<Api_RegisterAuth>(HttpMethod.POST, RequestKeyLogin)
+			.setRelativeUrl("/v1/register/auth2")
+			.setJsonBody(unit)
+			.setOnError(() => {
+				this.logWarning('Something is wrong');
+			})
+			.execute(response => {
+				window.location.href = response;
+			});
 	}
 }
 

@@ -19,9 +19,22 @@
 import * as React from 'react';
 import {
 	BaseComponent,
+	RoutingModule,
 	WrapperProps
 } from "@nu-art/thunderstorm/frontend";
 import {GetMeas} from "./pages/GetMeas";
+import {Auth} from "./pages/Auth";
+
+const RouteKey_Home = 'meas';
+const RouteKey_Login = 'login';
+
+function registerRoutes() {
+	RoutingModule.clearRoutes();
+
+	RoutingModule.addRoute(RouteKey_Home, "/measurement", GetMeas);
+	//home route should be declared last
+	RoutingModule.addRoute(RouteKey_Login, "/", Auth).setLabel('Login').setExact(false);
+}
 
 export class App
 	extends BaseComponent<WrapperProps> {
@@ -32,9 +45,10 @@ export class App
 	};
 
 	render() {
+		registerRoutes();
 		return (
 			<div onDrop={App.dropBlocker} onDragOver={App.dropBlocker}>
-				<GetMeas/>
+				{RoutingModule.getRoutesMap()}
 			</div>);
 	}
 }

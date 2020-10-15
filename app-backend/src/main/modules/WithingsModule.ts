@@ -178,18 +178,6 @@ class WithingsModule_Class
 		return response;
 	};
 
-	getAccessToken = async () => {
-		const response = await this.httpClient.post('/oauth2', {action: 'access_token', grant_type: 'authorization_code', client_id: '', client_secret: '', code: '', redirect_uri: ''});
-		await this.db.set('/auth/accessToken', response);
-		return response;
-	};
-
-	getRefreshToken = async () => {
-		const response = await this.httpClient.post('/oauth2', {action: 'requesttoken', grant_type: 'refresh_token', client_id: '', client_secret: '', refresh_token: ''});
-		await this.db.set('/auth/refreshToken', response);
-		return response;
-	};
-
 	private resolveAccessToken = async (body: UriOptions & CoreOptions) => {
 		const token = await this.resolveAccessTokenImpl(body);
 		if (!token)

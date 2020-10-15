@@ -18,20 +18,26 @@
  */
 
 import {
-	ApiWithBody,
-	ApiWithQuery
-} from "@nu-art/thunderstorm";
+	ApiResponse,
+	ExpressRequest,
+	ServerApi_Get
+} from "@nu-art/thunderstorm/backend";
+import {ApiWithQuery} from "@nu-art/thunderstorm";
+import {WithingsAuthModule} from "@modules/WithingsAuthModule";
 
-export type DB_Meas = {
-	unitId: string
-	product: string
-	timestamp: number
-	resp: any
-	// need to add the rest of the data you should be saving
+export type AssertParams = { code: string, state: string };
+export type Api_ListMeas = ApiWithQuery<string, void, AssertParams>
+
+class ServerApi_RegisterAuth2
+	extends ServerApi_Get<Api_ListMeas> {
+
+	constructor() {
+		super('auth2');
+	}
+
+	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: AssertParams, body: void) {
+		await WithingsAuthModule.assert(queryParams, response);
+	}
 }
-export type Unit = {
-	unitId: string
-	product: string
-}
-export type Api_RegisterAuth = ApiWithBody<'/v1/register/auth2', Unit, string>
-export type Api_ListMeas = ApiWithQuery<'/v1/measurements/get', any, Unit>
+
+module.exports = new ServerApi_RegisterAuth2();
