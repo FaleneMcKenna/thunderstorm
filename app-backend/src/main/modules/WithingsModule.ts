@@ -38,10 +38,6 @@ import {
 type Config = ClientIds & {
 	accessToken: string
 	refreshToken: string
-	// auth: WithingsAuthCode
-	// baseUrl?: string
-	// access: WithingsAccessToken
-	// refresh: WithingsRefreshToken
 }
 
 export type WithingsAuthCode = {
@@ -109,13 +105,16 @@ class WithingsModule_Class
 			product: unit.product,
 			timestamp: currentTimeMillies(), // This is in millie whereas they do seconds...for some reason =( should be something like resp.timestamp
 			resp
-			///..... the rest
 		};
 		await this.meas.upsert(doc);
 	}
 
 	getHeartRequest = async () => {
-		const response = await this.httpClient.post('/v2/heart', {action: 'list', startdate: '1590969600', enddate: '1601769600'});
+		const response = await this.httpClient.post('/v2/heart', {
+			action: 'list',
+			startdate: '1590969600',
+			enddate: '1601769600'
+		});
 		await this.db.set('/data/heart/response', response);
 		return response;
 	};
@@ -132,33 +131,48 @@ class WithingsModule_Class
 	};
 
 	getMeasActivityRequest = async () => {
-		const response = await this.httpClient.post('/v2/measure?action=getactivity', {action: 'getactivity', lastupdate: '1590969600'});
+		const response = await this.httpClient.post('/v2/measure?action=getactivity', {
+			action: 'getactivity',
+			lastupdate: '1590969600'
+		});
 		await this.db.set('/data/meas/activity/response', response);
 		return response;
 	};
 
 	getMeasIntraDayActivityRequest = async () => {
-		const response = await this.httpClient.post('/v2/measure', {action: 'getintradayactivity', startdate: '1590969600', enddate: '1590969600'});
+		const response = await this.httpClient.post('/v2/measure', {
+			action: 'getintradayactivity',
+			startdate: '1590969600',
+			enddate: '1590969600'
+		});
 		await this.db.set('/data/meas/intradayactivity/response', response);
 		return response;
 	};
 
-	getMeasWorkoutActivityRequest = async () => {
-		const response = await this.httpClient.post('/v2/measure', {action: 'getworkout', lastupdate: '1590969600'});
+	getMeasWorkoutActivityRequest = async (data_fields = ['steps','distance','elevation','soft','moderate','intense','active','calories','totalcalories','hr_average','hr_min','hr_max']) => {
+		const response = await this.httpClient.post('/v2/measure', {action: 'getworkout', lastupdate: '1590969600', data_fields: data_fields.join(',')});
 		await this.db.set('/data/meas/workout/response', response);
 		return response;
 	};
 
-	getMeasRequest = async (unit: Unit, category = '2', meastypes = ['1', '8']) => {
-		// 1590969600000 --> Mon Jun 01 2020 02:00:00 GMT+0200 (Central European Summer Time)
-		const resp = await this.httpClient.get('/measure', {action: 'getmeas', meastypes: meastypes.join(','), category, lastupdate: '1590969600'});
+	getMeasRequest = async (unit: Unit, category = '2', meastypes = ['1', '5', '6', '8']) => {
+		// Withings API writes in seconds 1590969600000 --> Mon Jun 01 2020 02:00:00 GMT+0200 (Central European Summer Time)
+		const resp = await this.httpClient.get('/measure', {
+			action: 'getmeas',
+			meastypes: meastypes.join(','),
+			category,
+			lastupdate: '1590969600'
+		});
 
 		await this.db.set('/data/meas/response', resp);
 		return resp;
 	};
 
 	getNotifyRequest = async () => {
-		const response = await this.httpClient.post('/notify', {action: 'get', callbackUrl: 'https://us-central1-local-falene-ts.cloudfunctions.net/api/v1/register/auth'});
+		const response = await this.httpClient.post('/notify', {
+			action: 'get',
+			callbackUrl: 'https://us-central1-local-falene-ts.cloudfunctions.net/api/v1/register/auth'
+		});
 		await this.db.set('/data/notify/response', response);
 		return response;
 	};
@@ -168,16 +182,47 @@ class WithingsModule_Class
 		return response;
 	};
 	getNotifySubscribeRequest = async () => {
-		const response = await this.httpClient.post('/notify', {action: 'subscribe', callbackUrl: 'https://us-central1-local-falene-ts.cloudfunctions.net/api/v1/register/auth'});
+		const response = await this.httpClient.post('/notify', {
+			action: 'subscribe',
+			callbackUrl: 'https://us-central1-local-falene-ts.cloudfunctions.net/api/v1/register/auth'
+		});
 		await this.db.set('/data/notify/subscribe', response);
 		return response;
 	};
 	postNotifyUpdateRequest = async () => {
-		const response = await this.httpClient.post('/notify', {action: 'update', callbackUrl: 'https%3A%2F%2Fus-central1-local-falene-ts.cloudfunctions.net%2Fapi', appli: '1', comment: ''});
+		const response = await this.httpClient.post('/notify', {
+			action: 'update',
+			callbackUrl: 'https%3A%2F%2Fus-central1-local-falene-ts.cloudfunctions.net%2Fapi',
+			appli: '1',
+			comment: ''
+		});
 		await this.db.set('/data/notify/update', response);
 		return response;
 	};
+	getAccessToken = async () => {
+		const response = await this.httpClient.post('/oauth2', {
+			action: 'access_token',
+			grant_type: 'authorization_code',
+			client_id: '',
+			client_secret: '',
+			code: '',
+			redirect_uri: ''
+		});
+		await this.db.set('/auth/accessToken', response);
+		return response;
+	};
 
+	getRefreshToken = async () => {
+		const response = await this.httpClient.post('/oauth2', {
+			action: 'requesttoken',
+			grant_type: 'refresh_token',
+			client_id: '',
+			client_secret: '',
+			refresh_token: ''
+		});
+		await this.db.set('/auth/refreshToken', response);
+		return response;
+	};
 	private resolveAccessToken = async (body: UriOptions & CoreOptions) => {
 		const token = await this.resolveAccessTokenImpl(body);
 		if (!token)
@@ -193,11 +238,10 @@ class WithingsModule_Class
 			return;
 		const doc = await this.tokens.queryUnique({where: {unitId, product}});
 		if (!doc)
-		// throw new ApiException(404, 'Missing auth token');
+			// throw new ApiException(404, 'Missing auth token');
 			return;
 
 		return doc.accessToken;
 	}
 }
-
 export const WithingsModule = new WithingsModule_Class();
