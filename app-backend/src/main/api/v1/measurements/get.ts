@@ -37,7 +37,7 @@ class ServerApi_ListMeas
 	}
 
 	protected async process(request: ExpressRequest, response: ApiResponse, unit: Unit, body: void) {
-		return WithingsModule.getMeasRequest(unit,'2');
+		return WithingsModule.getMeasRequest(unit);
 	}
 
 }

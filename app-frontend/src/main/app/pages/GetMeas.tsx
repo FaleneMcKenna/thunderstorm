@@ -9,6 +9,10 @@ import {
 	MeasModule,
 	RequestMeasKey
 } from "@modules/MeasModule";
+import {
+	createReadableTimestampObject,
+	generateHex
+} from "@nu-art/ts-common";
 
 type State = {
 	unit: Unit
@@ -62,7 +66,7 @@ export class GetMeas
 				}}
 			/>
 
-			<div style={{cursor: 'pointer'}} onClick={() => MeasModule.getData(this.state.unit)}>GetData</div>
+			<div style={{cursor: 'pointer'}} onClick={() => MeasModule.getDataImpl(this.state.unit)}>GetData</div>
 
 			{this.renderMeas()}
 		</>;
@@ -70,6 +74,12 @@ export class GetMeas
 
 	private renderMeas = () => {
 		const resp = MeasModule.getMeas(this.state.unit);
-		return <div>{JSON.stringify(resp, null, 2)}</div>;
+		console.log(resp);
+		return resp?.map((r:any) => {
+			return <React.Fragment key={generateHex(4)}>
+				<div>{createReadableTimestampObject('dd-MM-yyyy hh:mm', r.created).pretty}</div>
+				<div>{JSON.stringify(r.measures, null, 2)}</div>
+			</React.Fragment>;
+		});
 	};
 }

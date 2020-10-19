@@ -34,7 +34,7 @@ import {
 	DB_Meas,
 	Unit
 } from "@app/app-shared";
-import {config} from "firebase-functions";
+import {WithingsAuthModule} from "@modules/WithingsAuthModule";
 
 type Config = ClientIds & {
 	accessToken: string
@@ -88,7 +88,6 @@ class WithingsModule_Class
 	}
 
 	protected init(): void {
-		console.log(this.config.accessToken);
 		if (this.config.accessToken)
 			this.httpClient.setDefaultHeaders({Authorization: `Bearer ${this.config.accessToken}`});
 
@@ -150,19 +149,20 @@ class WithingsModule_Class
 		return response;
 	};
 
-	getMeasWorkoutActivityRequest = async (data_fields = ['steps','distance','elevation','soft','moderate','intense','active','calories','totalcalories','hr_average','hr_min','hr_max']) => {
+	getMeasWorkoutActivityRequest = async (data_fields = ['steps', 'distance', 'elevation', 'soft', 'moderate', 'intense', 'active', 'calories', 'totalcalories', 'hr_average', 'hr_min', 'hr_max']) => {
 		const response = await this.httpClient.post('/v2/measure', {action: 'getworkout', lastupdate: '1590969600', data_fields: data_fields.join(',')});
 		await this.db.set('/data/meas/workout/response', response);
 		return response;
 	};
 
-	getMeasRequest = async (unit: Unit, category = '2', meastypes = ['1', '5', '6', '8']) => {
+	getMeasRequest = async (unit: Unit, category = '1', meastypes = ['1', '2', '3', '4', '5', '6', '7', '8']) => {
+		await this.setHeaders(unit);
 		// Withings API writes in seconds 1590969600000 --> Mon Jun 01 2020 02:00:00 GMT+0200 (Central European Summer Time)
 		const resp = await this.httpClient.get('/measure', {
 			action: 'getmeas',
 			meastypes: meastypes.join(','),
 			category,
-			lastupdate: '1590969600'
+			lastupdate: '1500969600'
 		});
 
 		await this.db.set('/data/meas/response', resp);
@@ -200,20 +200,8 @@ class WithingsModule_Class
 		await this.db.set('/data/notify/update', response);
 		return response;
 	};
-	getAccessToken = async (client_id: ClientIds.client_id, client_secret: ClientIds.client_secret) => {
-		const response = await this.httpClient.post('/oauth2', {
-			action: 'access_token',
-			grant_type: 'authorization_code',
-			client_id: client_id,
-			client_secret: client_secret,
-			code: '',
-			redirect_uri: ''
-		});
-		await this.db.set('/auth/accessToken', response);
-		return response;
-	};
 
-	getRefreshToken = async (client_id: ClientIds.client_id, client_secret: ClientIds.client_secret) => {
+	getRefreshToken = async (client_id: string, client_secret: string) => {
 		const response = await this.httpClient.post('/oauth2', {
 			action: 'requesttoken',
 			grant_type: 'refresh_token',
@@ -237,12 +225,26 @@ class WithingsModule_Class
 		const product = body.body?.product; // put hardcoded value
 		if (!product || !unitId)
 			return;
+		return await this.getAccessToken(unitId, product);
+	}
+
+	private async getAccessToken(unitId: string, product: string) {
 		const doc = await this.tokens.queryUnique({where: {unitId, product}});
 		if (!doc)
-			// throw new ApiException(404, 'Missing auth token');
+		// throw new ApiException(404, 'Missing auth token');
 			return;
 
 		return doc.accessToken;
 	}
+
+	private async setHeaders(unit: Unit) {
+		const doc = await WithingsAuthModule.getUnitTokenDoc(unit);
+		// Probably here need to request new access token, as in call the refresh as long as we did login at start
+		if (!doc)
+			return;
+
+		this.httpClient.setDefaultHeaders({Authorization: `Bearer ${doc.access_token}`});
+	}
 }
+
 export const WithingsModule = new WithingsModule_Class();

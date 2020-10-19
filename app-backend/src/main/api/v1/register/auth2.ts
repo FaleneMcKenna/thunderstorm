@@ -36,8 +36,8 @@ class ServerApi_RegisterAuth2
 		super('auth2');
 	}
 
-	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: Unit) {
-		return WithingsAuthModule.getAuth(body.unitId, body.product);
+	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, unit: Unit) {
+		return WithingsAuthModule.getAuthUrl(unit);
 	}
 }
 

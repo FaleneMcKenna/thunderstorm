@@ -25,13 +25,13 @@ import {
 import {GetMeas} from "./pages/GetMeas";
 import {Auth} from "./pages/Auth";
 
-const RouteKey_Home = 'meas';
-const RouteKey_Login = 'login';
+export const RouteKey_Meas = 'meas';
+export const RouteKey_Login = 'login';
 
 function registerRoutes() {
 	RoutingModule.clearRoutes();
 
-	RoutingModule.addRoute(RouteKey_Home, "/measurement", GetMeas);
+	RoutingModule.addRoute(RouteKey_Meas, "/measurement", GetMeas);
 	//home route should be declared last
 	RoutingModule.addRoute(RouteKey_Login, "/", Auth).setLabel('Login').setExact(false);
 }

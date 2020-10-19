@@ -1,11 +1,13 @@
 import {
 	BaseComponent,
 	OnRequestListener,
+	RoutingModule,
 	TS_Input
 } from "@nu-art/thunderstorm/frontend";
 import * as React from "react";
 import {Unit} from "@app/app-shared";
 import {LoginModule} from "@modules/LoginModule";
+import {RouteKey_Meas} from "../App";
 
 type State = {
 	unit: Unit
@@ -31,6 +33,7 @@ export class Auth
 
 	render() {
 		return <>
+		<div style={{cursor: 'pointer'}} onClick={() => RoutingModule.goToRoute(RouteKey_Meas)}>Go to meas</div>
 			<TS_Input
 				id={'unitId'}
 				value={this.state.unit.unitId}

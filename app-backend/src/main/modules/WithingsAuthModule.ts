@@ -7,22 +7,38 @@ import {
 } from "@nu-art/firebase/backend";
 import {
 	currentTimeMillies,
-	Module
+	Module,
+	Second
 } from "@nu-art/ts-common";
 import {RequestAuthBody} from "../api/v1/register/auth";
 import {AssertParams} from "api/v1/register/assert";
 import {ApiResponse} from "@nu-art/thunderstorm/backend";
-import {
-	DB_Meas,
-	Unit
-} from "@app/app-shared";
+import {Unit} from "@app/app-shared";
 
 export type DB_Unit = {
 	unitId: string
 	product: string
 	access_token: string
+	refresh_token: string
 	auth_code: string
 	timestamp: number
+	expires_in: number
+	scope: string
+}
+
+type Oauth2Body = {
+	userid: string
+	access_token: string
+	refresh_token: string
+	scope: string
+	expires_in: number
+	token_type: "Bearer"
+};
+
+type OAuth2Resp = {
+	status: number,
+	error?: string
+	body?: Oauth2Body
 }
 
 export type AuthType = {
@@ -45,19 +61,20 @@ const Unit_Collection = 'unit_tokens';
 
 export class WithingsAuthModule_Class
 	extends Module<Configs> {
-	private httpClient = new HttpClient("https://");
+	private authClient = new HttpClient("https://account.withings.com");
+	private withingsClient = new HttpClient("https://wbsapi.withings.net");
 	private db!: DatabaseWrapper;
 	private firestore!: FirestoreWrapper;
 	private unitCollection!: FirestoreCollection<DB_Unit>;
 
-	protected init(unit: Unit): void {
+	protected init(): void {
 		//TODO validate you have the right config
 
 		let session = FirebaseModule.createAdminSession();
 		this.db = session.getDatabase();
 		this.firestore = session.getFirestore();
 		this.unitCollection = this.firestore.getCollection<DB_Unit>(Unit_Collection, ['unitId', 'product']);
-		this.getAuth(unit.unitId, unit.product).catch();
+		// this.getAuth(unit.unitId, unit.product).catch();
 	}
 
 	createBody: () => AuthType = () => {
@@ -70,7 +87,7 @@ export class WithingsAuthModule_Class
 		};
 	};
 
-	getAuth = async (unit: Unit) => {
+	getAuthUrl(unit: Unit): string {
 		// Here create request per "unit"
 		// @ts-ignore
 		// const key = this.getKey(unitId, product);
@@ -82,29 +99,33 @@ export class WithingsAuthModule_Class
 		// 	redirect_uri: this.config?.redirect_uri || encodeURI("https://us-central1-local-falene-ts.cloudfunctions.net/api")
 		// });
 		//
-		return this.httpClient.buildUrl('account.withings.com/oauth2_user/authorize2', {
+
+		const params = {
 			response_type: 'code',
 			client_id: this.config.client_id,
-			state: JSON.stringify({unit.unitId, unit.product}),
+			state: JSON.stringify(unit),
 			scope: 'user.metrics',
-			redirect_uri: this.getEncodedRedirectUri()
-		});
+			redirect_uri: encodeURI(this.getRedirectUri())
+		};
+		return this.authClient.buildUrl('/oauth2_user/authorize2', params);
 		// console.log(response);
 		// await this.unitCollection.upsert({unitId, product, auth: response.json});
 		// // await this.db.set('/auth/response', response);
 		// return response
+	}
+
+	private getRedirectUri = () => {
+		return this.config?.redirect_uri || "https://us-central1-local-falene-ts.cloudfunctions.net/api/v1/register/assert";
 	};
 
-	private getEncodedRedirectUri = () => encodeURI(this.config?.redirect_uri || "https://us-central1-local-falene-ts.cloudfunctions.net/api/v1/register/assert");
-
 	getAccessToken = async (code: string) => {
-		const response = await this.httpClient.post('/oauth2', {
-			action: 'access_token',
+		const response: OAuth2Resp = await this.withingsClient.post('/v2/oauth2', {
+			action: 'requesttoken',
 			grant_type: 'authorization_code',
 			client_id: this.config.client_id,
 			client_secret: this.config.client_secret,
 			code,
-			redirect_uri: this.getEncodedRedirectUri()
+			redirect_uri: this.getRedirectUri()
 		});
 
 		await this.db.set('/auth/accessToken', response);
@@ -117,11 +138,11 @@ export class WithingsAuthModule_Class
 	// 	return response;
 	// };
 
-	getKey = (unitId: string, product: string) => `${unitId}_${product}`;
+	getKey = (unit: Unit) => `${unit.unitId}_${unit.product}`;
 
 	async postRefresh() {
-		const authResponse = await this.getAuth('ir-qa-012', 'elliq');
-		const rsp = this.httpClient.post('wbsapi.withings.net/oauth2/token', {data: authResponse});
+		const authResponse = await this.getAuthUrl({unitId: 'ir-qa-012', product: 'elliq'});
+		const rsp = this.authClient.post('wbsapi.withings.net/oauth2/token', {data: authResponse});
 		await this.db.set('/auth/refreshToken', rsp);
 		return rsp;
 	}
@@ -146,19 +167,31 @@ export class WithingsAuthModule_Class
 	async assert(queryParams: AssertParams, response: ApiResponse) {
 		const auth_code = queryParams.code;
 		const unit: Unit = JSON.parse(queryParams.state);
-		const access_token = await this.getAccessToken(queryParams.code);
+		const resp = await this.getAccessToken(queryParams.code);
+		const body = resp.body;
 
-		const doc: DB_Unit = {
-			unitId: unit.unitId,
-			product: unit.product,
-			timestamp: currentTimeMillies(),
-			access_token,
-			auth_code
-		};
+		// Not sure why
+		const success = (body: Oauth2Body | undefined): body is Oauth2Body => !!(resp.status === 0 && body);
+		if (success(body)) {
+			const doc: DB_Unit = {
+				unitId: unit.unitId,
+				product: unit.product,
+				timestamp: currentTimeMillies(),
+				refresh_token: body.refresh_token,
+				access_token: body.access_token,
+				expires_in: body.expires_in * Second,
+				scope: body.scope,
+				auth_code
+			};
 
-		await this.unitCollection.upsert(doc);
+			await this.unitCollection.upsert(doc);
+		}
 
-		response.redirect(302, this.config.feUrl || 'https://local-falene-ts.firebaseapp.com');
+		response.redirect(302, (this.config.feUrl || 'https://local-falene-ts.firebaseapp.com') + (success(body) ? '' : '/failed'));
+	}
+
+	async getUnitTokenDoc(unit:Unit){
+		return this.unitCollection.queryUnique({where:unit});
 	}
 }
 

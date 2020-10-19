@@ -1,6 +1,11 @@
-import {Module} from "@nu-art/ts-common";
+import {
+	_setTimeout,
+	Module,
+	Second
+} from "@nu-art/ts-common";
 import {
 	Api_ListMeas,
+	Api_MeasUpdate,
 	Api_RegisterAuth,
 	Unit
 } from "@app/app-shared";
@@ -11,6 +16,7 @@ type Config = {}
 
 type Measures = { [product: string]: { [unitId: string]: any } };
 export const RequestMeasKey = 'get-meas';
+export const RequestFetchMeasKey = 'fetch-meas';
 export const RequestKeyLogin = 'login';
 
 export class MeasModule_Class
@@ -18,7 +24,25 @@ export class MeasModule_Class
 
 	private measures: Measures = {};
 
+	fetchData(unit: Unit) {
+		HttpModule
+			.createRequest<Api_MeasUpdate>(HttpMethod.POST, RequestFetchMeasKey)
+			.setRelativeUrl("/v1/write/upsert")
+			.setJsonBody(unit)
+			.setOnError(() => {
+				this.logWarning('Something is wrong');
+			})
+			.execute();
+	}
+
 	getData(unit: Unit) {
+		this.fetchData(unit);
+		_setTimeout(() => {
+			this.getDataImpl(unit);
+		}, 2 * Second);
+	}
+
+	getDataImpl(unit: Unit) {
 		HttpModule
 			.createRequest<Api_ListMeas>(HttpMethod.GET, RequestMeasKey)
 			.setRelativeUrl("/v1/measurements/get")
@@ -27,8 +51,8 @@ export class MeasModule_Class
 				this.logWarning('Something is wrong');
 			})
 			.execute(response => {
-				this.measures[response.product] = this.measures[response.product] || {};
-				this.measures[response.product][response.unitId] = response;
+				this.measures[unit.product] = this.measures[unit.product] || {};
+				this.measures[unit.product][unit.unitId] = response.body.measuregrps;
 			});
 	}
 

@@ -32,10 +32,11 @@ class ServerApi_RegisterAuth2
 	extends ServerApi_Get<Api_ListMeas> {
 
 	constructor() {
-		super('auth2');
+		super('assert');
 	}
 
 	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: AssertParams, body: void) {
+		console.log(queryParams,body);
 		await WithingsAuthModule.assert(queryParams, response);
 	}
 }
