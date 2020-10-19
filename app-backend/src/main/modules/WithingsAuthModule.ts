@@ -11,8 +11,11 @@ import {
 } from "@nu-art/ts-common";
 import {RequestAuthBody} from "../api/v1/register/auth";
 import {AssertParams} from "api/v1/register/assert";
-import {Unit} from "@app/app-shared";
 import {ApiResponse} from "@nu-art/thunderstorm/backend";
+import {
+	DB_Meas,
+	Unit
+} from "@app/app-shared";
 
 export type DB_Unit = {
 	unitId: string
@@ -47,27 +50,27 @@ export class WithingsAuthModule_Class
 	private firestore!: FirestoreWrapper;
 	private unitCollection!: FirestoreCollection<DB_Unit>;
 
-	protected init(): void {
+	protected init(unit: Unit): void {
 		//TODO validate you have the right config
 
 		let session = FirebaseModule.createAdminSession();
 		this.db = session.getDatabase();
 		this.firestore = session.getFirestore();
 		this.unitCollection = this.firestore.getCollection<DB_Unit>(Unit_Collection, ['unitId', 'product']);
-		this.getAuth('ir-qa-012', 'elliq').catch();
+		this.getAuth(unit.unitId, unit.product).catch();
 	}
 
 	createBody: () => AuthType = () => {
 		return {
 			'grant_type': 'authorization_code',
-			'client_id': '',
-			'client_secret': '',
+			'client_id': this.config.client_id,
+			'client_secret': this.config.client_secret,
 			'code': '',
 			'redirect_uri': ''
 		};
 	};
 
-	getAuth = async (unitId: string, product: string) => {
+	getAuth = async (unit: Unit) => {
 		// Here create request per "unit"
 		// @ts-ignore
 		// const key = this.getKey(unitId, product);
@@ -82,7 +85,7 @@ export class WithingsAuthModule_Class
 		return this.httpClient.buildUrl('account.withings.com/oauth2_user/authorize2', {
 			response_type: 'code',
 			client_id: this.config.client_id,
-			state: JSON.stringify({unitId, product}),
+			state: JSON.stringify({unit.unitId, unit.product}),
 			scope: 'user.metrics',
 			redirect_uri: this.getEncodedRedirectUri()
 		});

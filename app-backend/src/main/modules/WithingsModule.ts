@@ -34,6 +34,7 @@ import {
 	DB_Meas,
 	Unit
 } from "@app/app-shared";
+import {config} from "firebase-functions";
 
 type Config = ClientIds & {
 	accessToken: string
@@ -199,12 +200,12 @@ class WithingsModule_Class
 		await this.db.set('/data/notify/update', response);
 		return response;
 	};
-	getAccessToken = async () => {
+	getAccessToken = async (client_id: ClientIds.client_id, client_secret: ClientIds.client_secret) => {
 		const response = await this.httpClient.post('/oauth2', {
 			action: 'access_token',
 			grant_type: 'authorization_code',
-			client_id: '',
-			client_secret: '',
+			client_id: client_id,
+			client_secret: client_secret,
 			code: '',
 			redirect_uri: ''
 		});
@@ -212,12 +213,12 @@ class WithingsModule_Class
 		return response;
 	};
 
-	getRefreshToken = async () => {
+	getRefreshToken = async (client_id: ClientIds.client_id, client_secret: ClientIds.client_secret) => {
 		const response = await this.httpClient.post('/oauth2', {
 			action: 'requesttoken',
 			grant_type: 'refresh_token',
-			client_id: '',
-			client_secret: '',
+			client_id: client_id,
+			client_secret: client_secret,
 			refresh_token: ''
 		});
 		await this.db.set('/auth/refreshToken', response);
@@ -228,7 +229,7 @@ class WithingsModule_Class
 		if (!token)
 			return;
 
-		this.httpClient.setDefaultHeaders({Authorization: `Bearer ${token}`});
+		// this.httpClient.setDefaultHeaders({Authorization: `Bearer ${token}`});
 	};
 
 	private async resolveAccessTokenImpl(body: UriOptions & CoreOptions): Promise<string | undefined> {
