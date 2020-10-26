@@ -22,30 +22,23 @@ import {
 	ExpressRequest,
 	ServerApi_Get
 } from "@nu-art/thunderstorm/backend";
-import {
-	ApiWithQuery,
-	QueryParams
-} from "@nu-art/thunderstorm";
 import {WithingsModule} from "@modules/WithingsModule";
 import {
-	Api_ListHeartMeas,
+	Api_ListHeart,
 	Unit
 } from "@app/app-shared";
-
-
-type Api_ListHeart = ApiWithQuery<'/v1/heart/list', any, QueryParams>
 
 class ServerApi_ListHeart
 	extends ServerApi_Get<Api_ListHeart> {
 
-	constructor(){
-		super('list')
+	constructor() {
+		super('list');
 	}
 
-	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: void) {
-		return WithingsModule.getHeartRequest(unit)
+	protected async process(request: ExpressRequest, response: ApiResponse, unit: Unit, body: void) {
+		return WithingsModule.getHeartRequest(unit);
 	}
 
 }
 
-module.exports = new ServerApi_ListHeart()
+module.exports = new ServerApi_ListHeart();

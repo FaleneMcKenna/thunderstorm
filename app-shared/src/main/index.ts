@@ -22,11 +22,29 @@ import {
 	ApiWithQuery
 } from "@nu-art/thunderstorm";
 
+export type Meas = {
+	attrib: number
+	category: number
+	comment: null | string
+	created: number
+	date: number
+	deviceid: null | string
+	grpid: number
+	hash_deviceid: null | string
+	measures: {
+		algo: number
+		fm: number
+		type: number
+		unit: number
+		value: number
+	}[]
+}
+
 export type DB_Meas = {
 	unitId: string
 	product: string
 	timestamp: number
-	resp: any
+	resp: Meas
 	// need to add the rest of the data you should be saving
 }
 export type Unit = {
@@ -35,7 +53,7 @@ export type Unit = {
 }
 export type Api_MeasUpdate = ApiWithBody<'/v1/write/upsert', Unit, void>
 export type Api_RegisterAuth = ApiWithBody<'/v1/register/auth2', Unit, string>
-export type Api_RefreshAuth = ApiWithQuery<'/v1/register/refreshAuth', any>
-export type Api_ListMeas = ApiWithQuery<'/v1/measurements/get', any, Unit>
-export type Api_ListHeartMeas = ApiWithQuery<'/v1/heart/list', any, Unit>
+export type Api_RefreshAuth = ApiWithBody<'/v1/register/refreshAuth', Unit, void>
+export type Api_ListMeas = ApiWithQuery<'/v1/measurements/get', Meas[], Unit>
+export type Api_ListHeart = ApiWithQuery<'/v1/heart/list', any, Unit>
 

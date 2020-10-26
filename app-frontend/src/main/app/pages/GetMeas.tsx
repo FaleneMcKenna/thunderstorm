@@ -4,7 +4,10 @@ import {
 	TS_Input
 } from "@nu-art/thunderstorm/frontend";
 import * as React from "react";
-import {Unit} from "@app/app-shared";
+import {
+	Meas,
+	Unit
+} from "@app/app-shared";
 import {
 	MeasModule,
 	RequestMeasKey
@@ -77,12 +80,23 @@ export class GetMeas
 	private renderMeas = () => {
 		const resp = MeasModule.getMeas(this.state.unit);
 		console.log(resp);
-		return resp?.map((r:any) => {
-			return <React.Fragment key={generateHex(4)}>
-				<div>{createReadableTimestampObject('DD-MM-YYYY hh:mm', r.created).pretty}</div>
-				{/*<div>{JSON.parse(r.measures, value*10^unit)} </div>*/}
-				<div>{JSON.stringify(r.measures, null, 2)}</div>
-			</React.Fragment>;
-		});
+
+		return <table>
+			<tr>
+				<th>Date</th>
+				<th>Value</th>
+			</tr>
+			{resp?.map((r: Meas) => {
+				const m = r?.measures?.[0];
+				if(!m)
+					return;
+
+				return <tr key={generateHex(4)}>
+					<td>{createReadableTimestampObject('DD-MM-YYYY hh:mm', r.created * 1000).pretty}</td>
+					<td>{m.value*(10**(m.unit))}</td>
+					{/*<div>{JSON.stringify(r.measures, null, 2)}</div>*/}
+				</tr>;
+			})}
+		</table>;
 	};
 }

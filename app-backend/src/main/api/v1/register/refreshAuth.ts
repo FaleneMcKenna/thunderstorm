@@ -22,22 +22,23 @@ import {
 	ExpressRequest,
 	ServerApi_Post
 } from "@nu-art/thunderstorm/backend";
-import {
-	QueryParams
-} from "@nu-art/thunderstorm";
+import {QueryParams} from "@nu-art/thunderstorm";
 import {WithingsAuthModule} from "@modules/WithingsAuthModule";
-import {Api_RefreshAuth, any} from "@app/app-shared";
-
+import {
+	Api_RefreshAuth,
+	Unit
+} from "@app/app-shared";
 
 class ServerApi_RefreshAuth
 	extends ServerApi_Post<Api_RefreshAuth> {
 
 	constructor() {
-		super('refreshAuth')
+		super('refreshAuth');
 	}
 
-	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams) {
-		await WithingsAuthModule.postRefresh()
+	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: Unit) {
+		await WithingsAuthModule.postRefresh(body);
 	}
 }
-module.exports = new ServerApi_RefreshAuth()
+
+module.exports = new ServerApi_RefreshAuth();

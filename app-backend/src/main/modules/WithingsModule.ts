@@ -32,6 +32,7 @@ import {
 } from "request";
 import {
 	DB_Meas,
+	Meas,
 	Unit
 } from "@app/app-shared";
 import {WithingsAuthModule} from "@modules/WithingsAuthModule";
@@ -99,7 +100,7 @@ class WithingsModule_Class
 	}
 
 	async updateMeasurements(unit: Unit) {
-		const resp: DB_Meas = await this.getMeasRequest(unit);
+		const resp: Meas = await this.getMeasRequest(unit);
 		const doc: DB_Meas = {
 			unitId: unit.unitId,
 			product: unit.product,
@@ -108,8 +109,9 @@ class WithingsModule_Class
 		};
 		await this.meas.upsert(doc);
 	}
+
 	async updateHeartMeas(unit: Unit) {
-		const resp: DB_Meas = await this.getHeartRequest(unit);
+		const resp: Meas = await this.getHeartRequest(unit);
 		const doc: DB_Meas = {
 			unitId: unit.unitId,
 			product: unit.product,
@@ -118,6 +120,7 @@ class WithingsModule_Class
 		};
 		await this.meas.upsert(doc);
 	}
+
 	getHeartRequest = async (unit: Unit) => {
 		await this.setHeaders(unit);
 		const response = await this.httpClient.post('/v2/heart', {
@@ -177,7 +180,7 @@ class WithingsModule_Class
 		});
 
 		await this.db.set('/data/meas/response', resp);
-		return resp;
+		return resp.body.measuregrps;
 	};
 
 	getNotifyRequest = async () => {
@@ -212,17 +215,6 @@ class WithingsModule_Class
 		return response;
 	};
 
-	getRefreshToken = async (client_id: string, client_secret: string, refresh_token: WithingsRefreshToken) => {
-		const response = await this.httpClient.post('/oauth2', {
-			action: 'requesttoken',
-			grant_type: 'refresh_token',
-			client_id: client_id,
-			client_secret: client_secret,
-			refresh_token: WithingsRefreshToken
-		});
-		await this.db.set('/auth/refreshToken', response);
-		return response;
-	};
 	private resolveAccessToken = async (body: UriOptions & CoreOptions) => {
 		const token = await this.resolveAccessTokenImpl(body);
 		if (!token)

@@ -7,6 +7,7 @@ import {
 	Api_ListMeas,
 	Api_MeasUpdate,
 	Api_RegisterAuth,
+	Meas,
 	Unit
 } from "@app/app-shared";
 import {HttpModule} from "@nu-art/thunderstorm/frontend";
@@ -14,7 +15,11 @@ import {HttpMethod} from "@nu-art/thunderstorm";
 
 type Config = {}
 
-type Measures = { [product: string]: { [unitId: string]: any } };
+type Measures = {
+	[product: string]: {
+		[unitId: string]: Meas[]
+	}
+};
 export const RequestMeasKey = 'get-meas';
 export const RequestFetchMeasKey = 'fetch-meas';
 export const RequestKeyLogin = 'login';
@@ -53,7 +58,7 @@ export class MeasModule_Class
 			})
 			.execute(response => {
 				this.measures[unit.product] = this.measures[unit.product] || {};
-				this.measures[unit.product][unit.unitId] = response.body.measuregrps;
+				this.measures[unit.product][unit.unitId] = response as unknown as Meas[];
 			});
 	}
 
