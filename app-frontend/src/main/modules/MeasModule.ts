@@ -18,6 +18,7 @@ type Measures = { [product: string]: { [unitId: string]: any } };
 export const RequestMeasKey = 'get-meas';
 export const RequestFetchMeasKey = 'fetch-meas';
 export const RequestKeyLogin = 'login';
+export const RequestKeyRefresh = 'refresh';
 
 export class MeasModule_Class
 	extends Module<Config> {

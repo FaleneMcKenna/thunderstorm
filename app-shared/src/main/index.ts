@@ -35,4 +35,7 @@ export type Unit = {
 }
 export type Api_MeasUpdate = ApiWithBody<'/v1/write/upsert', Unit, void>
 export type Api_RegisterAuth = ApiWithBody<'/v1/register/auth2', Unit, string>
+export type Api_RefreshAuth = ApiWithQuery<'/v1/register/refreshAuth', any>
 export type Api_ListMeas = ApiWithQuery<'/v1/measurements/get', any, Unit>
+export type Api_ListHeartMeas = ApiWithQuery<'/v1/heart/list', any, Unit>
+

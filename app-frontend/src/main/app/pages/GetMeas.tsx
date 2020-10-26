@@ -28,6 +28,8 @@ export class GetMeas
 			unit: {
 				unitId: 'ir-qa-012',
 				product: 'elliq'
+				// measurement type, measType, category <- to avoid hard coding
+				//timestamps to save start date and end date.
 			}
 		};
 	}
@@ -77,7 +79,8 @@ export class GetMeas
 		console.log(resp);
 		return resp?.map((r:any) => {
 			return <React.Fragment key={generateHex(4)}>
-				<div>{createReadableTimestampObject('dd-MM-yyyy hh:mm', r.created).pretty}</div>
+				<div>{createReadableTimestampObject('DD-MM-YYYY hh:mm', r.created).pretty}</div>
+				{/*<div>{JSON.parse(r.measures, value*10^unit)} </div>*/}
 				<div>{JSON.stringify(r.measures, null, 2)}</div>
 			</React.Fragment>;
 		});

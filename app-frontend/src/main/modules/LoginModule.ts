@@ -9,6 +9,7 @@ import {HttpMethod} from "@nu-art/thunderstorm";
 type Config = {}
 
 export const RequestKeyLogin = 'login';
+export const RequestKeyRefresh = 'refresh';
 
 export class LoginModule_Class
 	extends Module<Config> {

@@ -10,7 +10,7 @@ import {
 	Module,
 	Second
 } from "@nu-art/ts-common";
-import {RequestAuthBody} from "../api/v1/register/auth";
+import {RequestAuthBody} from "../api/v1/register/refreshAuth";
 import {AssertParams} from "api/v1/register/assert";
 import {ApiResponse} from "@nu-art/thunderstorm/backend";
 import {Unit} from "@app/app-shared";
@@ -88,17 +88,6 @@ export class WithingsAuthModule_Class
 	};
 
 	getAuthUrl(unit: Unit): string {
-		// Here create request per "unit"
-		// @ts-ignore
-		// const key = this.getKey(unitId, product);
-		// const response: { json: AuthType } = await this.httpClient.get('account.withings.com/oauth2_user/authorize2', {
-		// 	response_type: 'code',
-		// 	client_id: this.config.client_id,
-		// 	state: this.config.state,
-		// 	scope: 'user.metrics',
-		// 	redirect_uri: this.config?.redirect_uri || encodeURI("https://us-central1-local-falene-ts.cloudfunctions.net/api")
-		// });
-		//
 
 		const params = {
 			response_type: 'code',
@@ -108,10 +97,6 @@ export class WithingsAuthModule_Class
 			redirect_uri: encodeURI(this.getRedirectUri())
 		};
 		return this.authClient.buildUrl('/oauth2_user/authorize2', params);
-		// console.log(response);
-		// await this.unitCollection.upsert({unitId, product, auth: response.json});
-		// // await this.db.set('/auth/response', response);
-		// return response
 	}
 
 	private getRedirectUri = () => {
@@ -132,18 +117,24 @@ export class WithingsAuthModule_Class
 		return response;
 	};
 
-	// getRefreshToken = async () => {
-	// 	const response = await this.httpClient.post('/oauth2', {action: 'requesttoken', grant_type: 'refresh_token', client_id: this.config.client_id, client_secret: '', refresh_token: ''});
-	// 	await this.db.set('/auth/refreshToken', response);
-	// 	return response;
-	// };
-
 	getKey = (unit: Unit) => `${unit.unitId}_${unit.product}`;
-
+	getRefreshUrl(unit: Unit): string {
+		const params = {
+			action: 'requesttoken',
+			client_id: this.config.client_id,
+			client_secret: this.config.client_secret,
+			state: JSON.stringify(unit),
+			scope: 'user.metrics',
+			grant_type: 'refresh_token',
+			// refresh_token: auth.accessToken.body.refresh_token
+			// refresh_token: this.Oauth2Body.refresh_token
+		};
+		return this.withingsClient.buildUrl('/v2/oauth2', params)
+	}
 	async postRefresh() {
-		const authResponse = await this.getAuthUrl({unitId: 'ir-qa-012', product: 'elliq'});
-		const rsp = this.authClient.post('wbsapi.withings.net/oauth2/token', {data: authResponse});
-		await this.db.set('/auth/refreshToken', rsp);
+		const authResponse = await this.getRefreshUrl({unitId: 'ir-qa-012', product: 'elliq'});
+		const rsp = this.authClient.post('wbsapi.withings.net/oauth2', {data: authResponse});
+		await this.db.set('/auth/accessToken', rsp);
 		return rsp;
 	}
 

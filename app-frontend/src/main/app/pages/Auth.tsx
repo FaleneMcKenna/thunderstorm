@@ -8,6 +8,7 @@ import * as React from "react";
 import {Unit} from "@app/app-shared";
 import {LoginModule} from "@modules/LoginModule";
 import {RouteKey_Meas} from "../App";
+import {RefreshModule} from "@modules/RefreshModule";
 
 type State = {
 	unit: Unit
@@ -60,6 +61,8 @@ export class Auth
 			/>
 
 			<div style={{cursor: 'pointer'}} onClick={() => LoginModule.login(this.state.unit)}>Login</div>
+			<div style={{cursor: 'pointer'}} onClick={() => RefreshModule.refresh(this.state.unit)}>Refresh</div>
+
 		</>;
 	}
 }

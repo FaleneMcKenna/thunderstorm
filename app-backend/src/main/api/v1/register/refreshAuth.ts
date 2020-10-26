@@ -23,34 +23,21 @@ import {
 	ServerApi_Post
 } from "@nu-art/thunderstorm/backend";
 import {
-	ApiWithBody,
 	QueryParams
 } from "@nu-art/thunderstorm";
 import {WithingsAuthModule} from "@modules/WithingsAuthModule";
+import {Api_RefreshAuth, any} from "@app/app-shared";
 
-export type RequestAuthBody = {
-	userid: number
-	measurement: number
-	//applications-scope-call
-	//  1-user.metrics-getMeas; 2-user.metrics-getMeas; 4-user.metrics-getMeas; 16-users.activity-getAct/getIntraAct/getWorkout
-	// 44-user.activity-getSleep/getSleepSummary; 46-user.info; 50-users.sleepevents; 51-users.sleepevents; 52-users.sleepevents
-	startdate: number
-	enddate: number
-}
 
-type Api_RegisterAuth = ApiWithBody<'/v1/register/auth', RequestAuthBody, void>
-
-class ServerApi_RegisterAuth
-	extends ServerApi_Post<Api_RegisterAuth> {
+class ServerApi_RefreshAuth
+	extends ServerApi_Post<Api_RefreshAuth> {
 
 	constructor() {
-		super('auth')
+		super('refreshAuth')
 	}
 
-	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: RequestAuthBody) {
-		await WithingsAuthModule.registerAuth(body)
-		// use the data they provide to update the unit/db
+	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams) {
+		await WithingsAuthModule.postRefresh()
 	}
 }
-
-module.exports = new ServerApi_RegisterAuth()
+module.exports = new ServerApi_RefreshAuth()

@@ -27,6 +27,10 @@ import {
 	QueryParams
 } from "@nu-art/thunderstorm";
 import {WithingsModule} from "@modules/WithingsModule";
+import {
+	Api_ListHeartMeas,
+	Unit
+} from "@app/app-shared";
 
 
 type Api_ListHeart = ApiWithQuery<'/v1/heart/list', any, QueryParams>
@@ -39,7 +43,7 @@ class ServerApi_ListHeart
 	}
 
 	protected async process(request: ExpressRequest, response: ApiResponse, queryParams: QueryParams, body: void) {
-		return WithingsModule.getHeartRequest()
+		return WithingsModule.getHeartRequest(unit)
 	}
 
 }

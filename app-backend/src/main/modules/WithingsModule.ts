@@ -108,8 +108,18 @@ class WithingsModule_Class
 		};
 		await this.meas.upsert(doc);
 	}
-
-	getHeartRequest = async () => {
+	async updateHeartMeas(unit: Unit) {
+		const resp: DB_Meas = await this.getHeartRequest(unit);
+		const doc: DB_Meas = {
+			unitId: unit.unitId,
+			product: unit.product,
+			timestamp: currentTimeMillies(), // This is in millie whereas they do seconds...for some reason =( should be something like resp.timestamp
+			resp
+		};
+		await this.meas.upsert(doc);
+	}
+	getHeartRequest = async (unit: Unit) => {
+		await this.setHeaders(unit);
 		const response = await this.httpClient.post('/v2/heart', {
 			action: 'list',
 			startdate: '1590969600',
@@ -118,6 +128,7 @@ class WithingsModule_Class
 		await this.db.set('/data/heart/response', response);
 		return response;
 	};
+
 	getSleepRequest = async ()/*: Promise<ResponseGetSleep>*/ => {
 		const response = await this.httpClient.post('/v2/sleep', {startdate: '1590969600', enddate: '1601769600'});
 		await this.db.set('/data/sleep/response', response);
@@ -194,20 +205,20 @@ class WithingsModule_Class
 		const response = await this.httpClient.post('/notify', {
 			action: 'update',
 			callbackUrl: 'https%3A%2F%2Fus-central1-local-falene-ts.cloudfunctions.net%2Fapi',
-			appli: '1',
+			appli: ['1', '4'],
 			comment: ''
 		});
 		await this.db.set('/data/notify/update', response);
 		return response;
 	};
 
-	getRefreshToken = async (client_id: string, client_secret: string) => {
+	getRefreshToken = async (client_id: string, client_secret: string, refresh_token: WithingsRefreshToken) => {
 		const response = await this.httpClient.post('/oauth2', {
 			action: 'requesttoken',
 			grant_type: 'refresh_token',
 			client_id: client_id,
 			client_secret: client_secret,
-			refresh_token: ''
+			refresh_token: WithingsRefreshToken
 		});
 		await this.db.set('/auth/refreshToken', response);
 		return response;
